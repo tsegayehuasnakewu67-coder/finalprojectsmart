@@ -2,6 +2,8 @@ const User       = require('../models/User');
 const Attendance = require('../models/Attendance');
 const Employee   = require('../models/Employee');
 const { syncEmployeeForUser } = require('../utils/employeeSync');
+const { findDuplicateFace } = require('../utils/faceRegistration');
+const { invalidateFaceCandidates } = require('../services/faceRecognitionService');
 
 // GET /api/users
 const getAllUsers = async (req, res) => {
@@ -51,6 +53,7 @@ const getUserById = async (req, res) => {
     const userData = user.toJSON();
     if (employee) {
       Object.assign(userData, {
+        employeeProfileId: employee._id,
         phone: employee.phone,
         gender: employee.gender,
         dateOfBirth: employee.dateOfBirth,
@@ -72,20 +75,52 @@ const getUserById = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const {
-      fullName, email, department, position, role, isActive, password,
+      fullName, employeeId, email, department, position, role, isActive, password,
       phone, gender, dateOfBirth, address, photo,
     } = req.body;
     const user = await User.findById(req.params.id).select('+password');
     if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
+    const previousRole = user.role;
+    const previousActiveState = user.isActive;
+    if (password !== undefined) {
+      return res.status(400).json({ success: false, message: 'Use the authorized password-reset workflow to change account passwords.' });
+    }
 
     if (fullName !== undefined) {
-      if (!String(fullName).trim()) return res.status(400).json({ success: false, message: 'Full name is required.' });
+      if (!String(fullName).trim() || String(fullName).trim().length > 201) {
+        return res.status(400).json({ success: false, message: 'Full name is required and must be 201 characters or fewer.' });
+      }
       user.fullName = String(fullName).trim();
       user.name = user.fullName;
     }
+    if (employeeId !== undefined) {
+      const normalizedEmployeeId = String(employeeId).trim().toUpperCase();
+      if (!normalizedEmployeeId || normalizedEmployeeId.length > 64) {
+        return res.status(400).json({ success: false, message: 'Employee ID is required and must be 64 characters or fewer.' });
+      }
+      const [duplicateUser, duplicateEmployee] = await Promise.all([
+        User.exists({ employeeId: normalizedEmployeeId, _id: { $ne: user._id } }),
+        Employee.findOne({ employeeId: normalizedEmployeeId }).select('user'),
+      ]);
+      if (duplicateUser || (duplicateEmployee && normalizedEmployeeId !== user.employeeId
+        && String(duplicateEmployee.user || '') !== String(user._id))) {
+        return res.status(409).json({ success: false, message: 'Employee ID is already in use.' });
+      }
+      user.employeeId = normalizedEmployeeId;
+    }
     if (email !== undefined) user.email = String(email).toLowerCase().trim();
-    if (department !== undefined) user.department = String(department).trim();
-    if (position !== undefined) user.position = String(position).trim();
+    if (department !== undefined) {
+      if (!String(department).trim() || String(department).trim().length > 100) {
+        return res.status(400).json({ success: false, message: 'Department is required and must be 100 characters or fewer.' });
+      }
+      user.department = String(department).trim();
+    }
+    if (position !== undefined) {
+      if (!String(position).trim() || String(position).trim().length > 100) {
+        return res.status(400).json({ success: false, message: 'Position is required and must be 100 characters or fewer.' });
+      }
+      user.position = String(position).trim();
+    }
     if (role !== undefined) {
       if (!['admin', 'hr', 'employee'].includes(role)) {
         return res.status(400).json({ success: false, message: 'Invalid user role.' });
@@ -96,15 +131,20 @@ const updateUser = async (req, res) => {
       if (typeof isActive !== 'boolean') return res.status(400).json({ success: false, message: 'isActive must be a boolean.' });
       user.isActive = isActive;
     }
-    if (password) {
-      if (password.length < 6) return res.status(400).json({ success: false, message: 'Password min 6 chars.' });
-      user.password = password;
+    if (photo !== undefined) {
+      if (String(photo).trim().length > 500) return res.status(400).json({ success: false, message: 'Profile photo URL must be 500 characters or fewer.' });
+      user.avatar = String(photo).trim();
     }
-    if (photo !== undefined) user.avatar = String(photo).trim();
 
     const employeeProfile = {};
-    if (phone !== undefined) employeeProfile.phone = String(phone).trim();
-    if (gender !== undefined) employeeProfile.gender = String(gender).trim();
+    if (phone !== undefined) {
+      if (String(phone).trim().length > 32) return res.status(400).json({ success: false, message: 'Phone number must be 32 characters or fewer.' });
+      employeeProfile.phone = String(phone).trim();
+    }
+    if (gender !== undefined) {
+      if (String(gender).trim().length > 40) return res.status(400).json({ success: false, message: 'Gender must be 40 characters or fewer.' });
+      employeeProfile.gender = String(gender).trim();
+    }
     if (dateOfBirth !== undefined) {
       if (dateOfBirth) {
         const parsedDate = new Date(dateOfBirth);
@@ -116,20 +156,36 @@ const updateUser = async (req, res) => {
         employeeProfile.dateOfBirth = null;
       }
     }
-    if (address !== undefined) employeeProfile.address = String(address).trim();
+    if (address !== undefined) {
+      if (String(address).trim().length > 300) return res.status(400).json({ success: false, message: 'Address must be 300 characters or fewer.' });
+      employeeProfile.address = String(address).trim();
+    }
     if (department !== undefined) employeeProfile.department = String(department).trim();
     if (position !== undefined) employeeProfile.position = String(position).trim();
     if (fullName !== undefined) employeeProfile.firstName = String(fullName).trim().split(/\s+/)[0] || 'Employee';
     if (fullName !== undefined) employeeProfile.lastName = String(fullName).trim().split(/\s+/).slice(1).join(' ') || 'Unknown';
+    if (req.body.status !== undefined) {
+      if (!['Active', 'Inactive', 'On Leave'].includes(req.body.status)) {
+        return res.status(400).json({ success: false, message: 'Invalid employment status.' });
+      }
+      employeeProfile.status = req.body.status;
+      if (req.body.status !== 'On Leave') user.isActive = req.body.status === 'Active';
+    }
 
+    if (user.role !== previousRole || user.isActive !== previousActiveState) {
+      user.authVersion = (user.authVersion || 0) + 1;
+    }
     await user.save();
     const employee = await syncEmployeeForUser(user, { preserveFace: true });
     if (employee) {
       await Employee.findByIdAndUpdate(employee._id, { $set: employeeProfile }, { runValidators: true });
     }
+    if (req.body.isActive !== undefined || req.body.employeeId !== undefined || req.body.status !== undefined) {
+      invalidateFaceCandidates();
+    }
     return res.json({ success: true, message: 'User updated.', data: { user: user.toJSON() } });
   } catch (err) {
-    if (err.code === 11000) return res.status(409).json({ success: false, message: 'Email in use.' });
+    if (err.code === 11000) return res.status(409).json({ success: false, message: 'Email or employee ID is already in use.' });
     if (err.name === 'ValidationError' || err.name === 'CastError') {
       return res.status(400).json({ success: false, message: err.message });
     }
@@ -148,6 +204,7 @@ const deleteUser = async (req, res) => {
     await Attendance.deleteMany({ userId: user._id });
     await Employee.deleteOne({ user: user._id });
     await User.findByIdAndDelete(req.params.id);
+    invalidateFaceCandidates();
     return res.json({ success: true, message: `"${user.fullName}" deleted.` });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
@@ -158,8 +215,21 @@ const deleteUser = async (req, res) => {
 const updateFace = async (req, res) => {
   try {
     const { faceDescriptor } = req.body;
-    if (!Array.isArray(faceDescriptor) || faceDescriptor.length !== 128) {
+    if (!Array.isArray(faceDescriptor) || faceDescriptor.length !== 128
+      || !faceDescriptor.every((value) => typeof value === 'number' && Number.isFinite(value) && Math.abs(value) <= 2)) {
       return res.status(400).json({ success: false, message: 'Need 128-element array.' });
+    }
+    const existingUser = await User.findById(req.params.id).select('employeeRef');
+    if (!existingUser) return res.status(404).json({ success: false, message: 'User not found.' });
+    const duplicate = await findDuplicateFace(faceDescriptor, {
+      excludeUserId: existingUser._id,
+      excludeEmployeeId: existingUser.employeeRef,
+    });
+    if (duplicate) {
+      return res.status(409).json({
+        success: false,
+        message: `This face is already registered to "${duplicate.fullName}" (ID: ${duplicate.employeeId}).`,
+      });
     }
     const user = await User.findByIdAndUpdate(
       req.params.id, { faceDescriptor }, { new: true, runValidators: true }
@@ -170,6 +240,7 @@ const updateFace = async (req, res) => {
       { $set: { faceEncoding: faceDescriptor } },
       { runValidators: true },
     );
+    invalidateFaceCandidates();
     return res.json({ success: true, message: 'Face registered.', data: { user } });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });

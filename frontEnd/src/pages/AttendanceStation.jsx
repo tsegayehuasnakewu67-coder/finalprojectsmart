@@ -28,7 +28,7 @@ const S = {
   ERROR:    'error',
 };
 
-const SCAN_INTERVAL_MS = 1200;
+const SCAN_INTERVAL_MS = 500;
 const RESET_DELAY_MS   = 6000;
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -39,8 +39,8 @@ const fmtDate = formatEthiopianTime;
 // ── Action → human label maps ────────────────────────────────────────────────
 const ACTION_LABEL = {
   morning_checkin:     { icon: '🌅', title: 'Morning Check-In',        color: '#22c55e' },
-  afterlunch_checkin:  { icon: '🔙', title: 'After-Lunch Check-In',    color: '#3b82f6' },
-  afterlunch_checkout: { icon: '🌇', title: 'End of Day Check-Out',    color: '#8b5cf6' },
+  afterlunch_checkin:  { icon: '🔙', title: 'After-Lunch Check-In',    color: '#3b79f6' },
+  afterlunch_checkout: { icon: '🌇', title: 'End of Day Check-Out',    color: '#5c8ff6' },
   auto_checkout:       { icon: '⏰', title: 'Auto Check-Out Applied',  color: '#64748b' },
 };
 
@@ -283,7 +283,7 @@ function ResultOverlay({ phase, result, onReset }) {
     icon  = '✅';
     title = 'Day Complete';
   } else if (result.action === 'too_early') {
-    bg    = 'rgba(30,64,175,0.93)';
+    bg    = 'rgba(30, 78, 175,0.93)';
     icon  = '⏳';
     title = 'Too Early';
   } else {
@@ -336,10 +336,10 @@ function ResultOverlay({ phase, result, onReset }) {
 // ── KioskModeBanner ──────────────────────────────────────────────────────────
 function KioskModeBanner({ mode, shift }) {
   const map = {
-    morning:    { color: '#22c55e', bg: 'rgba(34,197,94,0.12)',   icon: '🌅', label: 'Morning Check-In' },
-    break:      { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  icon: '☕', label: 'Lunch Break — Auto Check-Out Active' },
-    afterlunch: { color: '#3b82f6', bg: 'rgba(59,130,246,0.12)',  icon: '🔙', label: 'After-Lunch Check-In' },
-    closed:     { color: '#64748b', bg: 'rgba(100,116,139,0.12)', icon: '🌙', label: 'Shift Ended' },
+    morning:    { color: '#22c55e', bg: 'rgba(34, 88, 197,0.12)',   icon: '🌅', label: 'Morning Check-In' },
+    break:      { color: '#f59e0b', bg: 'rgba(14, 90, 242,0.12)',  icon: '☕', label: 'Lunch Break — Auto Check-Out Active' },
+    afterlunch: { color: '#3b79f6', bg: 'rgba(60, 122, 245,0.12)',  icon: '🔙', label: 'After-Lunch Check-In' },
+    closed:     { color: '#64748b', bg: 'rgba(74, 104, 165,0.12)', icon: '🌙', label: 'Shift Ended' },
   };
   const { color, bg, icon, label } = map[mode] ?? map.morning;
 
@@ -359,7 +359,7 @@ function KioskModeBanner({ mode, shift }) {
       <span style={{ fontSize: 18 }}>{icon}</span>
       <div>
         <p style={{ margin: 0, fontWeight: 700, color, fontSize: 13 }}>{label}</p>
-        {hint && <p style={{ margin: 0, color: '#94a3b8', fontSize: 11 }}>{hint}</p>}
+        {hint && <p style={{ margin: 0, color: '#94a0b8', fontSize: 11 }}>{hint}</p>}
       </div>
     </div>
   );
@@ -407,8 +407,8 @@ function SessionGuide({ shift, kioskMode }) {
             {s.auto && (
               <span style={styles.autoBadge}>AUTO</span>
             )}
-            <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: s.active ? '#f1f5f9' : '#64748b', whiteSpace: 'pre-line' }}>{s.label}</p>
-            <p style={{ margin: 0, fontSize: 10, color: '#94a3b8' }}>{s.time}</p>
+            <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: s.active ? '#f1f4f9' : '#64748b', whiteSpace: 'pre-line' }}>{s.label}</p>
+            <p style={{ margin: 0, fontSize: 10, color: '#94a0b8' }}>{s.time}</p>
           </div>
           {i < steps.length - 1 && <span style={styles.guideArrow}>›</span>}
         </div>
@@ -419,10 +419,10 @@ function SessionGuide({ shift, kioskMode }) {
 
 // ── StatusBar ─────────────────────────────────────────────────────────────────
 function StatusBar({ phase, kioskMode }) {
-  const modeColor = { morning: '#22c55e', break: '#f59e0b', afterlunch: '#3b82f6', closed: '#64748b' };
+  const modeColor = { morning: '#22c55e', break: '#f59e0b', afterlunch: '#3b79f6', closed: '#64748b' };
   const map = {
-    [S.LOADING]:  { color: '#64748b', text: 'Initialising…',                         dot: '#94a3b8' },
-    [S.SCANNING]: { color: modeColor[kioskMode] || '#3b82f6', text: 'Scanning — look at the camera', dot: modeColor[kioskMode] || '#3b82f6' },
+    [S.LOADING]:  { color: '#64748b', text: 'Initialising…',                         dot: '#94a0b8' },
+    [S.SCANNING]: { color: modeColor[kioskMode] || '#3b79f6', text: 'Scanning — look at the camera', dot: modeColor[kioskMode] || '#3b79f6' },
     [S.SUCCESS]:  { color: '#22c55e', text: 'Attendance recorded!',                  dot: '#22c55e' },
     [S.INFO]:     { color: '#f59e0b', text: 'Information',                           dot: '#f59e0b' },
     [S.ERROR]:    { color: '#ef4444', text: 'Scan failed',                           dot: '#ef4444' },
@@ -439,7 +439,7 @@ function StatusBar({ phase, kioskMode }) {
 // ── StatusPill ────────────────────────────────────────────────────────────────
 function StatusPill({ status, lateLabel }) {
   return (
-    <span style={{ background: 'rgba(255,255,255,0.22)', borderRadius: 20, padding: '4px 14px', fontSize: 13, fontWeight: 700, color: '#fff', marginTop: 6, display: 'inline-block' }}>
+    <span style={{ background: 'rgba(59, 130, 246, 0.22)', borderRadius: 20, padding: '4px 14px', fontSize: 13, fontWeight: 700, color: '#fff', marginTop: 6, display: 'inline-block' }}>
       {status}{lateLabel ? ` — ${lateLabel}` : ''}
     </span>
   );
@@ -454,10 +454,10 @@ function Clock() {
   }, []);
   return (
     <div style={{ textAlign: 'right' }}>
-      <p style={{ margin: 0, fontSize: 22, fontWeight: 700, color: '#f1f5f9', fontVariantNumeric: 'tabular-nums' }}>
+      <p style={{ margin: 0, fontSize: 22, fontWeight: 700, color: '#f1f4f9', fontVariantNumeric: 'tabular-nums' }}>
         {formatEthiopianTime(time, { seconds: true })}
       </p>
-      <p style={{ margin: 0, fontSize: 12, color: '#94a3b8' }}>
+      <p style={{ margin: 0, fontSize: 12, color: '#94a0b8' }}>
         {formatEthiopianDate(time, { weekday: 'short', month: 'short', day: 'numeric' })}
       </p>
     </div>
@@ -476,7 +476,7 @@ const hexToRgba = (hex, alpha) => {
 const styles = {
   page: {
     minHeight: '100vh',
-    background: 'linear-gradient(160deg, #0f172a 0%, #1e293b 100%)',
+    background: 'linear-gradient(160deg, #0f182a 0%, #1c273d 100%)',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -491,7 +491,7 @@ const styles = {
     maxWidth: 700,
   },
   headerIcon:  { fontSize: 36, flexShrink: 0 },
-  headerTitle: { margin: '0 0 2px', fontSize: 24, fontWeight: 700, color: '#f1f5f9' },
+  headerTitle: { margin: '0 0 2px', fontSize: 24, fontWeight: 700, color: '#f1f4f9' },
   headerSub:   { margin: 0, color: '#64748b', fontSize: 13 },
   headerRight: { marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 },
   modeBanner: {
@@ -504,10 +504,10 @@ const styles = {
     position: 'relative',
     borderRadius: 16,
     overflow: 'hidden',
-    background: '#000',
+    background: '#000000',
     aspectRatio: '4/3',
     width: '100%',
-    boxShadow: '0 0 0 3px #1e40af, 0 20px 60px rgba(0,0,0,0.6)',
+    boxShadow: '0 0 0 3px #1e4eaf, 0 20px 60px rgba(0,0,0,0.6)',
   },
   video:  { width: '100%', height: '100%', objectFit: 'cover', display: 'block' },
   canvas: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' },
@@ -518,12 +518,12 @@ const styles = {
   },
   scanFrame: {
     width: 200, height: 240,
-    border: '3px solid #3b82f6',
+    border: '3px solid #3b79f6',
     borderRadius: 12,
     boxShadow: '0 0 0 2000px rgba(0,0,0,0.15)',
   },
   scanText: {
-    marginTop: 14, color: '#93c5fd', fontWeight: 600,
+    marginTop: 14, color: '#93b6fd', fontWeight: 600,
     fontSize: 14, textShadow: '0 1px 3px rgba(0,0,0,0.8)',
   },
   resultOverlay: {
@@ -538,7 +538,7 @@ const styles = {
   resultMsg:  { margin: '10px 0 4px', opacity: 0.9, fontSize: 14, maxWidth: 320 },
   sessionTable: {
     marginTop: 12, width: '100%', maxWidth: 340,
-    background: 'rgba(0,0,0,0.25)', borderRadius: 10,
+    background: 'rgba(0, 0, 0,0.25)', borderRadius: 10,
     padding: '8px 0', display: 'flex', flexDirection: 'column', gap: 2,
   },
   sessionRow: {
@@ -550,27 +550,27 @@ const styles = {
   sessionRowTime:  { fontVariantNumeric: 'tabular-nums', fontWeight: 700 },
   resetHint: { margin: '10px 0 6px', opacity: 0.65, fontSize: 11 },
   resetBtn: {
-    background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.4)',
+    background: 'rgba(59, 130, 246, 0.2)', border: '1px solid rgba(255,255,255,0.4)',
     borderRadius: 8, padding: '8px 20px', color: '#fff', fontSize: 13,
     fontWeight: 600, cursor: 'pointer',
   },
   loadingOverlay: {
-    position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)',
+    position: 'absolute', inset: 0, background: 'rgba(0, 0, 0,0.7)',
     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16,
   },
   spinner: {
     width: 40, height: 40, borderRadius: '50%',
     border: '4px solid rgba(255,255,255,0.2)',
-    borderTopColor: '#3b82f6',
+    borderTopColor: '#3b79f6',
     animation: 'spin 0.75s linear infinite',
   },
-  loadingText: { color: '#94a3b8', fontSize: 14, margin: 0 },
+  loadingText: { color: '#94a0b8', fontSize: 14, margin: 0 },
   statusBar: {
-    marginTop: 12, background: '#1e293b', borderRadius: 10,
+    marginTop: 12, background: '#1c273d', borderRadius: 10,
     padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 10,
   },
   guide: {
-    marginTop: 12, background: '#1e293b', borderRadius: 10,
+    marginTop: 12, background: '#1c273d', borderRadius: 10,
     padding: '12px 16px', display: 'flex', alignItems: 'center',
     gap: 6, flexWrap: 'wrap',
   },
@@ -578,15 +578,15 @@ const styles = {
     display: 'flex', alignItems: 'center', gap: 6,
   },
   guideIcon:  { fontSize: 18 },
-  guideArrow: { color: '#334155', fontSize: 18, margin: '0 2px' },
+  guideArrow: { color: '#333e55', fontSize: 18, margin: '0 2px' },
   autoBadge: {
     display: 'inline-block',
     fontSize: 8, fontWeight: 800, letterSpacing: 1,
-    background: '#f59e0b', color: '#000',
+    background: '#0e5af2', color: '#000',
     borderRadius: 4, padding: '1px 4px',
     marginBottom: 2,
   },
   footer: { marginTop: 16, color: '#475569', fontSize: 12, textAlign: 'center' },
   loginHint: { marginTop: 6, color: '#475569', fontSize: 12 },
-  loginLink: { color: '#3b82f6', textDecoration: 'none' },
+  loginLink: { color: '#3b79f6', textDecoration: 'none' },
 };

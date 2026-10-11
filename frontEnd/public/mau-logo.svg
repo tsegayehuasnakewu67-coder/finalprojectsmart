@@ -1,22 +1,38 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-labelledby="title desc">
-  <title id="title">Mekdela Abba University logo</title>
-  <desc id="desc">Blue diamond university emblem with a gold MAU mark</desc>
+  <title id="title">Mekdela Amba University logo</title>
+  <desc id="desc">Green university crest with a gold emblem and MAU lettering</desc>
   <defs>
-    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#16b7e8"/>
-      <stop offset="1" stop-color="#0873b8"/>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b2f2b"/>
+      <stop offset="1" stop-color="#103d36"/>
     </linearGradient>
-    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#ffe275"/>
-      <stop offset="1" stop-color="#d49a13"/>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f9e7a5"/>
+      <stop offset="1" stop-color="#d9a93f"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3bd0a0"/>
+      <stop offset="1" stop-color="#0e8d6b"/>
     </linearGradient>
   </defs>
+
   <rect width="320" height="320" fill="#ffffff"/>
-  <path d="M160 8 312 160 160 312 8 160Z" fill="url(#blue)" stroke="#075985" stroke-width="7"/>
-  <path d="M160 31 289 160 160 289 31 160Z" fill="none" stroke="#9be7f5" stroke-width="3" opacity=".8"/>
-  <circle cx="160" cy="132" r="54" fill="#0b73b5" stroke="#f4cf4a" stroke-width="5"/>
-  <path d="M160 71v122M111 143h98M126 106c21 16 47 16 68 0M125 168c23-15 47-15 70 0" fill="none" stroke="#f4cf4a" stroke-width="7" stroke-linecap="round"/>
-  <path d="M72 205c23-19 46-19 69 0l19 17 19-17c23-19 46-19 69 0l-19 31c-23-18-46-18-69 0-23-18-46-18-69 0Z" fill="#fff" stroke="#d49a13" stroke-width="4"/>
-  <path d="M85 245h150v29H85z" fill="url(#gold)" stroke="#9a6a0a" stroke-width="3"/>
-  <text x="160" y="265" text-anchor="middle" fill="#11365f" font-family="Arial, sans-serif" font-size="24" font-weight="900" letter-spacing="4">MAU</text>
+
+  <circle cx="160" cy="160" r="146" fill="url(#bgGrad)" stroke="#7fe7c8" stroke-width="6"/>
+  <circle cx="160" cy="160" r="126" fill="#0f473f" stroke="#d8f8ee" stroke-width="3" opacity="0.95"/>
+
+  <path d="M90 112L115 88L160 118L205 88L230 112L233 142H87L90 112Z" fill="url(#goldGrad)" stroke="#f7f2d2" stroke-width="3"/>
+  <path d="M98 142h124l-18 18H116Z" fill="#e8f5ef" opacity="0.92"/>
+
+  <path d="M95 214V116L123 163L160 120L197 163L225 116V214H198V161L160 204L122 161V214H95Z" fill="#edfdf8"/>
+  <path d="M112 214h96v20h-96z" fill="#f9e7a5" opacity="0.98"/>
+
+  <path d="M110 150c11-18 23-27 50-27s39 9 50 27" fill="none" stroke="#0e8d6b" stroke-width="7" stroke-linecap="round"/>
+  <path d="M117 167c18-12 32-18 43-18s25 6 43 18" fill="none" stroke="#0e8d6b" stroke-width="7" stroke-linecap="round"/>
+
+  <circle cx="160" cy="160" r="68" fill="none" stroke="url(#greenGrad)" stroke-width="7" opacity="0.9"/>
+  <path d="M160 72v24M132 93l28 21 28-21" fill="none" stroke="#f9e7a5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <path d="M95 234h130l-14 18H109Z" fill="url(#goldGrad)" stroke="#b57d18" stroke-width="3"/>
+  <text x="160" y="256" text-anchor="middle" fill="#0d2f2a" font-family="Arial, sans-serif" font-size="24" font-weight="900" letter-spacing="4">MAU</text>
 </svg>

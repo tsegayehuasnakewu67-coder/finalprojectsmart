@@ -15,13 +15,25 @@
  * ─────────────────────────────────────────────────────────────────────────
  */
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { loadModels, getDescriptor } from '../utils/faceApi';
+import { loadModels } from '../utils/faceApi';
 import { attendanceService } from '../services/attendanceService';
 import { formatEthiopianDate, formatEthiopianTime } from '../utils/ethiopianDateTime';
+import useFaceScan from '../hooks/useFaceScan';
+import AttendanceScanner from '../components/AttendanceScanner';
 import {
   Camera, CheckCircle2, XCircle, RefreshCw, Clock,
   LogIn, LogOut, Coffee, CalendarCheck, AlertCircle,
 } from 'lucide-react';
+
+const BACKGROUND_IMAGES = [
+  'mau7.jfif',
+  'mau1.jfif',
+  'mau2.jfif',
+  'mau3.jfif',
+  'mau4.jfif',
+  'mau5.jfif',
+  'mau6.jfif',
+];
 
 /* ── Phase enum ─────────────────────────────────────────────────────────── */
 const PHASE = {
@@ -36,14 +48,16 @@ const PHASE = {
   IN_BREAK:        'in_break',        // lunch break window
   DAY_COMPLETE:    'day_complete',    // all sessions recorded today
   TOO_EARLY:       'too_early',       // before shift opens
+  KIOSK_CLOSED:    'kiosk_closed',
+  SPOOF_DETECTED:  'spoof_detected',
   ERROR:           'error',           // face not recognised / server error
 };
 
 /* ── Status-bar dot + text colour ──────────────────────────────────────── */
 const STATUS_STYLE = {
   [PHASE.BOOT]:           { dot: '#475569', text: '#64748b' },   // slate
-  [PHASE.IDLE]:           { dot: '#3b82f6', text: '#60a5fa' },   // blue
-  [PHASE.SCANNING]:       { dot: '#3b82f6', text: '#60a5fa' },   // blue (pulsing)
+  [PHASE.IDLE]:           { dot: '#3b79f6', text: '#6093fa' },   // blue
+  [PHASE.SCANNING]:       { dot: '#3b79f6', text: '#6093fa' },   // blue (pulsing)
   [PHASE.SUCCESS]:        { dot: '#22c55e', text: '#4ade80' },   // GREEN only here
   [PHASE.CHECKOUT_OK]:    { dot: '#f97316', text: '#fb923c' },   // orange
   [PHASE.CHECK_IN_REQUIRED]: { dot: '#f59e0b', text: '#fbbf24' },
@@ -51,21 +65,25 @@ const STATUS_STYLE = {
   [PHASE.MORNING_ACTIVE]: { dot: '#f59e0b', text: '#fbbf24' },   // amber
   [PHASE.IN_BREAK]:       { dot: '#f59e0b', text: '#fbbf24' },   // amber
   [PHASE.DAY_COMPLETE]:   { dot: '#f59e0b', text: '#fbbf24' },   // amber
-  [PHASE.TOO_EARLY]:      { dot: '#38bdf8', text: '#7dd3fc' },   // sky
-  [PHASE.ERROR]:          { dot: '#ef4444', text: '#f87171' },   // RED only here
+  [PHASE.TOO_EARLY]:      { dot: '#3878f8', text: '#7da7fc' },   // sky
+  [PHASE.KIOSK_CLOSED]:   { dot: '#f59e0b', text: '#fbbf24' },
+  [PHASE.SPOOF_DETECTED]: { dot: '#ef4444', text: '#f87171' },
+  [PHASE.ERROR]:           { dot: '#ef4444', text: '#f87171' },   // RED only here
 };
 
 /* ── Overlay background per phase ──────────────────────────────────────── */
 const OVERLAY_BG = {
-  [PHASE.SUCCESS]:        'rgba(5,  46, 22,  0.94)',   // deep green
-  [PHASE.CHECKOUT_OK]:    'rgba(67, 20, 7,   0.94)',   // deep orange
-  [PHASE.CHECK_IN_REQUIRED]: 'rgba(69, 26, 3, 0.94)',
-  [PHASE.ALREADY]:        'rgba(69, 26, 3,   0.94)',   // deep amber
-  [PHASE.MORNING_ACTIVE]: 'rgba(69, 26, 3,   0.94)',   // deep amber
-  [PHASE.IN_BREAK]:       'rgba(28, 25, 5,   0.94)',   // deep amber/brown
-  [PHASE.DAY_COMPLETE]:   'rgba(28, 25, 5,   0.94)',   // deep amber/brown
-  [PHASE.TOO_EARLY]:      'rgba(8,  47, 73,  0.94)',   // deep sky
-  [PHASE.ERROR]:          'rgba(69, 10, 10,  0.94)',   // deep red
+  [PHASE.SUCCESS]:        'rgba(15, 35, 80, 0.94)',
+  [PHASE.CHECKOUT_OK]:    'rgba(15, 35, 80, 0.94)',
+  [PHASE.CHECK_IN_REQUIRED]: 'rgba(15, 35, 80, 0.94)',
+  [PHASE.ALREADY]:        'rgba(15, 35, 80, 0.94)',
+  [PHASE.MORNING_ACTIVE]: 'rgba(15, 35, 80, 0.94)',
+  [PHASE.IN_BREAK]:       'rgba(15, 35, 80, 0.94)',
+  [PHASE.DAY_COMPLETE]:   'rgba(15, 35, 80, 0.94)',
+  [PHASE.TOO_EARLY]:      'rgba(15, 35, 80, 0.94)',
+  [PHASE.KIOSK_CLOSED]:   'rgba(15, 35, 80, 0.94)',
+  [PHASE.SPOOF_DETECTED]: 'rgba(15, 35, 80, 0.94)',
+  [PHASE.ERROR]:          'rgba(15, 35, 80, 0.94)',
 };
 
 /* ── Map backend response → PHASE ──────────────────────────────────────── */
@@ -77,11 +95,14 @@ function resolvePhase(res, isCheckInMode) {
   if (normalized.tooEarly || /not open yet|too early|come back at/i.test(message)) {
     return PHASE.TOO_EARLY;
   }
+  if (normalized.kioskClosed) return PHASE.KIOSK_CLOSED;
   if (normalized.inBreak)        return PHASE.IN_BREAK;
   if (normalized.morningActive)  return PHASE.MORNING_ACTIVE;
   if (normalized.dayComplete)    return PHASE.DAY_COMPLETE;
   if (normalized.noRecord)       return PHASE.CHECK_IN_REQUIRED;
-  if (normalized.alreadyCheckedIn || normalized.alreadyCheckedOut) return PHASE.ALREADY;
+  if (normalized.alreadyCheckedIn || normalized.alreadyCheckedOut || normalized.alreadyScanned) {
+    return PHASE.ALREADY;
+  }
 
   // Successful actions
   if (normalized.success) {
@@ -94,6 +115,7 @@ function resolvePhase(res, isCheckInMode) {
     return PHASE.SUCCESS;
   }
 
+  if (normalized.status === 403) return PHASE.SPOOF_DETECTED;
   return PHASE.ERROR;
 }
 
@@ -108,7 +130,8 @@ function ResultIcon({ phase }) {
     case PHASE.MORNING_ACTIVE: return <CheckCircle2 size={SIZE} color="#fbbf24" />;
     case PHASE.IN_BREAK:       return <Coffee       size={SIZE} color="#fbbf24" />;
     case PHASE.DAY_COMPLETE:   return <CalendarCheck size={SIZE} color="#fbbf24" />;
-    case PHASE.TOO_EARLY:      return <AlertCircle  size={SIZE} color="#7dd3fc" />;
+    case PHASE.TOO_EARLY:      return <AlertCircle  size={SIZE} color="#7da7fc" />;
+    case PHASE.KIOSK_CLOSED:   return <Clock        size={SIZE} color="#fbbf24" />;
     default:                   return <XCircle      size={SIZE} color="#f87171" />;
   }
 }
@@ -124,7 +147,9 @@ function resultHeadline(phase, employeeName) {
     case PHASE.IN_BREAK:       return 'Enjoy Your Lunch Break!';
     case PHASE.DAY_COMPLETE:   return 'Attendance Completed for Today';
     case PHASE.TOO_EARLY:      return 'Check-In Not Open Yet';
-    case PHASE.ERROR:          return 'Not Recognised';
+    case PHASE.KIOSK_CLOSED:   return 'Kiosk Closed';
+    case PHASE.SPOOF_DETECTED:  return 'Liveness Verification Failed';
+    case PHASE.ERROR:           return 'Not Recognised';
     default:                   return 'Error';
   }
 }
@@ -134,7 +159,7 @@ function statusBarText(phase, msg, isCheckIn) {
   switch (phase) {
     case PHASE.BOOT:            return 'Loading face recognition models…';
     case PHASE.IDLE:            return 'Ready — choose an action';
-    case PHASE.SCANNING:        return 'Scanning — align your face with the frame';
+    case PHASE.SCANNING:        return 'Complete the live camera challenge to continue';
     case PHASE.SUCCESS:         return 'Check-in recorded successfully';
     case PHASE.CHECKOUT_OK:     return 'Check-out recorded successfully';
     case PHASE.CHECK_IN_REQUIRED: return 'Check-in is required before you can check out';
@@ -145,6 +170,8 @@ function statusBarText(phase, msg, isCheckIn) {
     case PHASE.IN_BREAK:        return 'Lunch break in progress — come back after break';
     case PHASE.DAY_COMPLETE:    return 'Attendance already completed for today';
     case PHASE.TOO_EARLY:       return 'Outside check-in window — too early';
+    case PHASE.KIOSK_CLOSED:   return msg || 'Check-in is closed for today';
+    case PHASE.SPOOF_DETECTED:  return msg || 'Live camera challenge was not verified';
     case PHASE.ERROR:           return `Recognition failed${msg ? ': ' + msg : ''}`;
     default:                    return msg || '';
   }
@@ -159,13 +186,22 @@ export default function MarkAttendance() {
   const [msg,     setMsg]     = useState('');
   const [result,  setResult]  = useState(null);   // raw backend data payload
   const [tick,    setTick]    = useState(new Date());
+  const [livenessAction, setLivenessAction] = useState(null);
+  const { faceStatus, startScan, stopScan } = useFaceScan();
 
   const videoRef  = useRef(null);
   const streamRef = useRef(null);
-  const scanRef   = useRef(null);
   const resetRef  = useRef(null);
   const modeRef   = useRef(mode);
+  const challengeRef = useRef(null);
+  const audioContextRef = useRef(null);
   useEffect(() => { modeRef.current = mode; }, [mode]);
+
+  const stopCamera = useCallback(() => {
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
+  }, []);
 
   /* ── Live clock ── */
   useEffect(() => {
@@ -175,15 +211,11 @@ export default function MarkAttendance() {
 
   /* ── Cleanup on unmount ── */
   useEffect(() => () => {
-    clearInterval(scanRef.current);
+    stopScan();
     clearTimeout(resetRef.current);
     stopCamera();
-  }, []);
-
-  const stopCamera = () => {
-    streamRef.current?.getTracks().forEach(t => t.stop());
-    streamRef.current = null;
-  };
+    audioContextRef.current?.close();
+  }, [stopCamera, stopScan]);
 
   /* ── Boot: load face-api models ── */
   useEffect(() => {
@@ -197,81 +229,138 @@ export default function MarkAttendance() {
 
   /* ── Camera open / scanning loop ── */
   const openCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: 640, height: 480, facingMode: 'user' },
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { width: 640, height: 480, facingMode: 'user' },
+    });
+    streamRef.current = stream;
+    if (videoRef.current) {
+      videoRef.current.srcObject = stream;
+      await videoRef.current.play();
+    }
+  };
+
+  const selectMode = async (m) => {
+    clearTimeout(resetRef.current);
+    stopScan();
+    setMode(m);
+    setMsg('');
+    setResult(null);
+    setPhase(PHASE.BOOT);
+    if (typeof window !== 'undefined'
+      && window.AudioContext
+      && (!audioContextRef.current || audioContextRef.current.state === 'closed')) {
+      try {
+        audioContextRef.current = new window.AudioContext();
+        audioContextRef.current.resume().catch((error) => {
+          console.warn('Attendance sound feedback is unavailable:', error);
+        });
+      } catch (error) {
+        console.warn('Attendance sound feedback is unavailable:', error);
       }
+    }
+    try {
+      await openCamera();
+      const challenge = await attendanceService.startLivenessChallenge();
+      challengeRef.current = challenge;
+      setLivenessAction(challenge.action);
       beginScanning();
-    } catch {
-      setMsg('Camera access denied. Allow permissions and reload.');
+    } catch (error) {
+      console.error('Unable to start attendance scan:', error);
+      stopCamera();
+      const cameraPermissionError = error?.name === 'NotAllowedError'
+        || error?.name === 'NotFoundError'
+        || error?.name === 'NotReadableError';
+      setMsg(cameraPermissionError
+        ? 'Camera access failed. Check camera permissions and make sure no other app is using the camera.'
+        : error?.response?.data?.message || error.message || 'Could not start camera verification.');
       setPhase(PHASE.ERROR);
     }
   };
 
-  const selectMode = m => {
-    clearTimeout(resetRef.current);
-    setMode(m);
-    setMsg('');
-    setResult(null);
-    openCamera();
-  };
-
   const beginScanning = () => {
     setPhase(PHASE.SCANNING);
-    scanRef.current = setInterval(async () => {
-      if (!videoRef.current) return;
-      try {
-        const descriptor = await getDescriptor(videoRef.current);
-        if (!descriptor) return;   // no face detected yet — keep looping
-        clearInterval(scanRef.current);
+    if (!videoRef.current || !challengeRef.current) {
+      setMsg('Camera or verification challenge is unavailable. Please try again.');
+      setPhase(PHASE.ERROR);
+      return;
+    }
+    startScan(videoRef.current, challengeRef.current, {
+      onComplete: async (descriptor, proof) => {
         stopCamera();
-        await submitDescriptor(descriptor);
-      } catch { /* transient frame error — keep scanning */ }
-    }, 1000);
+        return submitDescriptor(descriptor, proof);
+      },
+      onError: (message, reason) => {
+        stopCamera();
+        setMsg(message);
+        setPhase(reason === 'expired' ? PHASE.SPOOF_DETECTED : PHASE.ERROR);
+        resetRef.current = setTimeout(resetKiosk, 6000);
+      },
+    });
+  };
+
+  const playScanTone = (success) => {
+    const context = audioContextRef.current;
+    if (!context || context.state === 'closed') return;
+    try {
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.type = 'sine';
+      oscillator.frequency.value = success ? 880 : 220;
+      gain.gain.setValueAtTime(0.0001, context.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.12, context.currentTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.2);
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start();
+      oscillator.stop(context.currentTime + 0.21);
+    } catch (error) {
+      console.warn('Attendance sound feedback failed:', error);
+    }
   };
 
   /* ── Submit descriptor to backend ── */
-  const submitDescriptor = async (descriptor) => {
+  const submitDescriptor = async (descriptor, livenessProof) => {
     try {
       const isCheckIn = modeRef.current === 'checkin';
 
       // Both check-in and check-out hit the same smart endpoint now
       const res = isCheckIn
-        ? await attendanceService.mark(descriptor)
-        : await attendanceService.checkout(descriptor);
+        ? await attendanceService.mark(descriptor, livenessProof)
+        : await attendanceService.checkout(descriptor, livenessProof);
 
       const resolvedPhase = resolvePhase(res, isCheckIn);
 
       setResult(res.data ?? null);
       setMsg(res.message ?? '');
       setPhase(resolvedPhase);
+      playScanTone(Boolean(res.success));
+      resetRef.current = setTimeout(resetKiosk, 6000);
+      return Boolean(res.success);
     } catch (err) {
       // axios puts the server's error response in err.response.data
       const serverRes = err?.response?.data ?? {};
-      const resolvedPhase = resolvePhase(serverRes, modeRef.current === 'checkin');
+      const resolvedPhase = resolvePhase({ ...serverRes, status: err?.response?.status }, modeRef.current === 'checkin');
 
       setResult(serverRes.data ?? null);
       setMsg(serverRes.message ?? err.message ?? 'Unknown error');
       setPhase(resolvedPhase);
+      playScanTone(false);
+      resetRef.current = setTimeout(resetKiosk, 6000);
+      return false;
     }
-    // Auto-reset after 6 seconds
-    resetRef.current = setTimeout(resetKiosk, 6000);
   };
 
   const resetKiosk = useCallback(() => {
     clearTimeout(resetRef.current);
-    clearInterval(scanRef.current);
+    stopScan();
     stopCamera();
     setResult(null);
     setMsg('');
     setMode(null);
+    setLivenessAction(null);
+    challengeRef.current = null;
     setPhase(PHASE.IDLE);
-  }, []);
+  }, [stopCamera, stopScan]);
 
   /* ── Derived booleans ── */
   const isDone    = ![PHASE.BOOT, PHASE.IDLE, PHASE.SCANNING].includes(phase);
@@ -287,19 +376,65 @@ export default function MarkAttendance() {
     display: 'flex', alignItems: 'center', gap: '10px',
     marginTop: '16px', width: '100%', maxWidth: '576px',
     padding: '10px 16px', borderRadius: '12px',
-    background: '#0f172a', border: '1px solid #1e293b',
+    background: '#0f182a', border: '1px solid #1e283b',
   };
 
   /* ── Scanning pulse — inline keyframes ── */
   const PULSE_CSS = `
     @keyframes kiosk-pulse {
-      0%   { box-shadow: 0 0 0 0   rgba(59,130,246,0.55); }
-      70%  { box-shadow: 0 0 0 14px rgba(59,130,246,0);   }
-      100% { box-shadow: 0 0 0 0   rgba(59,130,246,0);    }
+      0%   { box-shadow: 0 0 0 0   rgba(59, 121, 246,0.55); }
+      70%  { box-shadow: 0 0 0 14px rgba(59, 121, 246,0);   }
+      100% { box-shadow: 0 0 0 0   rgba(59, 121, 246,0);    }
     }
     .kiosk-scan-ring { animation: kiosk-pulse 1.6s ease-out infinite; }
     @keyframes kiosk-spin { to { transform: rotate(360deg); } }
     .kiosk-spin { animation: kiosk-spin 0.85s linear infinite; }
+    @keyframes kiosk-success { 0% { transform: scale(0.75); opacity: 0.4; } 70% { transform: scale(1.08); } 100% { transform: scale(1); opacity: 1; } }
+    .kiosk-success-icon { animation: kiosk-success 420ms ease-out both; }
+    .attendance-kiosk-root > *:not(.attendance-kiosk-background) {
+      position: relative;
+      z-index: 2;
+    }
+    .attendance-kiosk-background {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+      background: #070d1b;
+    }
+    .attendance-kiosk-background::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, rgba(3, 8, 20, 0.48), rgba(6, 15, 34, 0.36) 52%, rgba(5, 12, 28, 0.54)),
+        radial-gradient(circle at 50% 45%, rgba(16, 39, 82, 0.12), rgba(2, 7, 18, 0.26));
+    }
+    .attendance-kiosk-background img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      opacity: 0;
+      transform: scale(1.06);
+      filter: brightness(1.18) saturate(1.08);
+      animation: kiosk-background-cycle 42s ease-in-out infinite;
+    }
+    @keyframes kiosk-background-cycle {
+      0%, 12% { opacity: 1; transform: scale(1.04); }
+      17%, 100% { opacity: 0; transform: scale(1.12); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .attendance-kiosk-background img {
+        animation: none;
+        opacity: 0;
+        transform: none;
+      }
+      .attendance-kiosk-background img:first-child { opacity: 1; }
+    }
   `;
 
   return (
@@ -307,12 +442,23 @@ export default function MarkAttendance() {
       <style>{PULSE_CSS}</style>
 
       <div style={{
-        minHeight: '100vh', background: '#020617',
+        minHeight: '100vh', background: '#070d1b',
         display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
         padding: '16px',
         fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
-      }}>
+        position: 'relative', isolation: 'isolate',
+      }} className="attendance-kiosk-root">
+        <div className="attendance-kiosk-background" aria-hidden="true">
+          {BACKGROUND_IMAGES.map((image, index) => (
+            <img
+              key={image}
+              src={`/login-backgrounds/${image}`}
+              alt=""
+              style={{ animationDelay: `-${index * 6}s` }}
+            />
+          ))}
+        </div>
 
         {/* ── Header ── */}
         <div style={{
@@ -320,7 +466,7 @@ export default function MarkAttendance() {
           display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
         }}>
           <div>
-            <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f1f5f9', margin: 0 }}>
+            <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f1f4f9', margin: 0 }}>
               Attendance Set
             </h1>
             <p style={{ fontSize: '0.875rem', color: '#64748b', margin: '2px 0 0' }}>
@@ -328,7 +474,7 @@ export default function MarkAttendance() {
             </p>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <p style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f1f5f9', margin: 0, fontVariantNumeric: 'tabular-nums' }}>
+            <p style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f1f4f9', margin: 0, fontVariantNumeric: 'tabular-nums' }}>
               {formatEthiopianTime(tick, { seconds: true })}
             </p>
             <p style={{ fontSize: '0.75rem', color: '#64748b', margin: '2px 0 0' }}>
@@ -367,7 +513,7 @@ export default function MarkAttendance() {
             width: '100%', maxWidth: '576px', marginBottom: '12px',
             display: 'flex', alignItems: 'center', gap: '8px',
             padding: '8px 16px', borderRadius: '12px',
-            background: isCheckIn ? 'rgba(5,46,22,0.5)'  : 'rgba(67,20,7,0.5)',
+            background: isCheckIn ? 'rgba(5, 19, 46,0.5)'  : 'rgba(7, 27, 67,0.5)',
             border:     isCheckIn ? '1px solid #166534'  : '1px solid #9a3412',
             fontSize: '0.875rem', fontWeight: 600,
             color: isCheckIn ? '#4ade80' : '#fb923c',
@@ -381,41 +527,16 @@ export default function MarkAttendance() {
         <div style={{
           position: 'relative', width: '100%', maxWidth: '576px',
           aspectRatio: '4/3', borderRadius: '20px', overflow: 'hidden',
-          background: '#0f172a', border: '1px solid #1e293b',
+          background: '#0f182a', border: '1px solid #1e283b',
           boxShadow: '0 25px 60px rgba(0,0,0,0.5)',
         }}>
-          <video
-            ref={videoRef}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-            muted playsInline
+          <AttendanceScanner
+            videoRef={videoRef}
+            active={phase === PHASE.SCANNING}
+            faceStatus={faceStatus || (livenessAction === 'blink'
+              ? 'Blink your eyes, then look at the camera.'
+              : 'Turn your head slowly to one side.')}
           />
-
-          {/* ── Scanning overlay — BLUE ring, never green ── */}
-          {phase === PHASE.SCANNING && (
-            <div style={{
-              position: 'absolute', inset: 0,
-              display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center',
-              pointerEvents: 'none',
-            }}>
-              {/* Face alignment frame */}
-              <div
-                className="kiosk-scan-ring"
-                style={{
-                  width: '192px', height: '224px',
-                  borderRadius: '20px',
-                  border: '2.5px solid #60a5fa',
-                }}
-              />
-              <p style={{
-                marginTop: '16px', fontSize: '0.875rem', fontWeight: 600,
-                color: '#60a5fa',
-                textShadow: '0 1px 6px rgba(0,0,0,0.8)',
-              }}>
-                Scanning — align your face
-              </p>
-            </div>
-          )}
 
           {/* ── Result overlay ── */}
           {isDone && (
@@ -425,10 +546,10 @@ export default function MarkAttendance() {
               alignItems: 'center', justifyContent: 'center',
               background: overlayBg,
               padding: '24px', textAlign: 'center',
-              color: '#f1f5f9',
+              color: '#f1f4f9',
             }}>
               {/* Icon */}
-              <div style={{ marginBottom: '12px' }}>
+              <div className={phase === PHASE.SUCCESS || phase === PHASE.CHECKOUT_OK ? 'kiosk-success-icon' : undefined} style={{ marginBottom: '12px' }}>
                 <ResultIcon phase={phase} />
               </div>
 
@@ -440,6 +561,21 @@ export default function MarkAttendance() {
               {/* Employee detail block (success / already states) */}
               {result?.employee && (
                 <div style={{ marginBottom: '8px' }}>
+                  {result.employee.photo && (
+                    <img
+                      src={result.employee.photo}
+                      alt={`${employeeName} profile`}
+                      onError={(event) => { event.currentTarget.style.display = 'none'; }}
+                      style={{
+                        width: '72px',
+                        height: '72px',
+                        margin: '0 auto 8px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        border: '2px solid rgba(255,255,255,0.6)',
+                      }}
+                    />
+                  )}
                   <p style={{ fontSize: '0.875rem', opacity: 0.75, margin: '2px 0' }}>
                     {result.employee.department}
                   </p>
@@ -457,10 +593,10 @@ export default function MarkAttendance() {
                         ? 'rgba(21,128,61,0.35)'
                         : result.status === 'Late'
                           ? 'rgba(180,83,9,0.35)'
-                          : 'rgba(30,41,59,0.5)',
+                          : 'rgba(30, 40, 59,0.5)',
                       color: result.status === 'Present' ? '#86efac'
                            : result.status === 'Late'    ? '#fcd34d'
-                           :                               '#94a3b8',
+                           :                               '#94a0b8',
                     }}>
                       {result.status}
                     </span>
@@ -493,7 +629,7 @@ export default function MarkAttendance() {
                   style={{
                     marginTop: '10px', display: 'flex', alignItems: 'center', gap: '6px',
                     padding: '9px 18px', borderRadius: '8px',
-                    background: 'rgba(251,191,36,0.18)', border: '1px solid rgba(251,191,36,0.4)',
+                    background: 'rgba(43, 110, 244,0.18)', border: '1px solid rgba(251,191,36,0.4)',
                     cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, color: '#fbbf24',
                   }}
                 >
@@ -509,12 +645,12 @@ export default function MarkAttendance() {
                 style={{
                   marginTop: '10px', display: 'flex', alignItems: 'center', gap: '6px',
                   padding: '8px 18px', borderRadius: '8px',
-                  background: 'rgba(255,255,255,0.1)', border: 'none', cursor: 'pointer',
-                  fontSize: '0.875rem', fontWeight: 500, color: '#f1f5f9',
+                  background: 'rgba(59, 130, 246, 0.12)', border: 'none', cursor: 'pointer',
+                  fontSize: '0.875rem', fontWeight: 500, color: '#f1f4f9',
                   transition: 'background 0.15s',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59, 130, 246, 0.24)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(59, 130, 246, 0.12)'; }}
               >
                 <RefreshCw size={14} /> New scan
               </button>
@@ -527,15 +663,15 @@ export default function MarkAttendance() {
               position: 'absolute', inset: 0,
               display: 'flex', flexDirection: 'column',
               alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(2,6,23,0.85)',
+              background: 'rgba(2, 9, 23,0.85)',
             }}>
               <div
                 className="kiosk-spin"
                 style={{
                   width: '40px', height: '40px',
                   borderRadius: '50%',
-                  border: '4px solid #1e293b',
-                  borderTopColor: '#3b82f6',
+                  border: '4px solid #1e283b',
+                  borderTopColor: '#3b79f6',
                   marginBottom: '12px',
                 }}
               />
@@ -549,9 +685,9 @@ export default function MarkAttendance() {
               position: 'absolute', inset: 0,
               display: 'flex', flexDirection: 'column',
               alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(2,6,23,0.72)',
+              background: 'rgba(2, 9, 23,0.72)',
             }}>
-              <Camera size={40} color="#334155" style={{ marginBottom: '12px' }} />
+              <Camera size={40} color="#333e55" style={{ marginBottom: '12px' }} />
               <p style={{ fontSize: '0.875rem', color: '#475569' }}>Select Check In or Check Out above</p>
             </div>
           )}
@@ -566,24 +702,24 @@ export default function MarkAttendance() {
               width: '10px', height: '10px', borderRadius: '50%',
               background: statusStyle.dot, flexShrink: 0,
               boxShadow: phase === PHASE.SCANNING
-                ? '0 0 0 0 rgba(59,130,246,0.55)'
+                ? '0 0 0 0 rgba(59, 121, 246,0.55)'
                 : 'none',
             }}
           />
           <span style={{ fontSize: '0.875rem', color: statusStyle.text }}>
-            {statusBarText(phase, msg, isCheckIn)}
+            {phase === PHASE.SCANNING ? faceStatus : statusBarText(phase, msg, isCheckIn)}
           </span>
         </div>
 
         {/* ── Footer ── */}
-        <p style={{ marginTop: '12px', fontSize: '0.75rem', color: '#334155', textAlign: 'center' }}>
+        <p style={{ marginTop: '12px', fontSize: '0.75rem', color: '#333e55', textAlign: 'center' }}>
           Stand in front of the camera · Look straight ahead · Ensure good lighting
         </p>
         <a
           href="/login"
-          style={{ marginTop: '4px', fontSize: '0.75rem', color: '#334155', textDecoration: 'none', transition: 'color 0.15s' }}
-          onMouseEnter={e => { e.currentTarget.style.color = '#3b82f6'; }}
-          onMouseLeave={e => { e.currentTarget.style.color = '#334155'; }}
+          style={{ marginTop: '4px', fontSize: '0.75rem', color: '#333e55', textDecoration: 'none', transition: 'color 0.15s' }}
+          onMouseEnter={e => { e.currentTarget.style.color = '#3b79f6'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = '#333e55'; }}
         >
           Staff login →
         </a>

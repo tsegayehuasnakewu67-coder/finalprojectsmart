@@ -14,6 +14,7 @@ const employeeSchema = new mongoose.Schema({
   photo: { type: String, default: '' },
   faceEncoding: {
     type: [Number],
+    select: false,
     default: [],
     validate: {
       validator: (encoding) => encoding.length === 0 || encoding.length === 128,
@@ -30,7 +31,13 @@ employeeSchema.virtual('fullName').get(function () {
 
 employeeSchema.index({ firstName: 1, lastName: 1 });
 employeeSchema.index({ department: 1, status: 1 });
-employeeSchema.set('toJSON', { virtuals: true });
+employeeSchema.set('toJSON', {
+  virtuals: true,
+  transform: (_document, value) => {
+    delete value.faceEncoding;
+    return value;
+  },
+});
 employeeSchema.set('toObject', { virtuals: true });
 
 module.exports = mongoose.model('Employee', employeeSchema);

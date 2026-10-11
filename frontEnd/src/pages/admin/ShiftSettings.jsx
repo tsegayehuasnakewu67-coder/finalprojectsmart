@@ -94,7 +94,7 @@ export default function ShiftSettings() {
     : '—';
 
   if (loading) return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'60vh', color:'#94a3b8', gap:10 }}>
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'60vh', color:'#94a0b8', gap:10 }}>
       <Loader2 size={20} style={{ animation:'spin 1s linear infinite' }} /> Loading settings…
     </div>
   );
@@ -104,15 +104,15 @@ export default function ShiftSettings() {
 
       {/* Header */}
       <div>
-        <h1 style={{ fontSize:20, fontWeight:700, color:'#f1f5f9', margin:0 }}>Shift Settings</h1>
+        <h1 style={{ fontSize:20, fontWeight:700, color:'#f1f4f9', margin:0 }}>Shift Settings</h1>
         <p style={{ fontSize:13, color:'#64748b', marginTop:4 }}>
           Configure work hours, grace period, lunch break and late-arrival rules.
         </p>
       </div>
 
       <div style={{ ...card, gap:8 }} aria-label="Regional date and time settings">
-        <h2 style={{ fontSize:14, fontWeight:700, color:'#e2e8f0', margin:0 }}>Regional Date &amp; Time</h2>
-        <p style={{ ...hint, color:'#94a3b8' }}>
+        <h2 style={{ fontSize:14, fontWeight:700, color:'#e2e7f0', margin:0 }}>Regional Date &amp; Time</h2>
+        <p style={{ ...hint, color:'#94a0b8' }}>
           Ethiopian calendar · Addis Ababa time (Africa/Addis_Ababa, UTC+03:00) · 24-hour clock.
           Attendance decisions and timestamps use this time zone. Dates are displayed in the Ethiopian calendar;
           stored dates and date-filter inputs remain Gregorian.
@@ -166,18 +166,18 @@ export default function ShiftSettings() {
                 onClick={toggle}
                 style={{
                   position:'relative', width:44, height:24, borderRadius:12, border:'none', cursor:'pointer',
-                  background: form.lunchEnabled ? '#2563eb' : '#334155',
+                  background: form.lunchEnabled ? '#2567eb' : '#2a3b5e',
                   transition:'background 0.2s',
                   flexShrink:0,
                 }}
               >
                 <span style={{
                   position:'absolute', top:3, left: form.lunchEnabled ? 22 : 3,
-                  width:18, height:18, borderRadius:'50%', background:'#fff',
+                  width:18, height:18, borderRadius:'50%', background:'#f4f8ff',
                   transition:'left 0.2s',
                 }} />
               </button>
-              <span style={{ fontSize:13, color: form.lunchEnabled ? '#f1f5f9' : '#64748b', fontWeight:600 }}>
+              <span style={{ fontSize:13, color: form.lunchEnabled ? '#f1f4f9' : '#64748b', fontWeight:600 }}>
                 {form.lunchEnabled ? 'Lunch break enabled' : 'Lunch break disabled'}
               </span>
             </div>
@@ -185,7 +185,7 @@ export default function ShiftSettings() {
             {/* Lunch fields — only shown when enabled */}
             {form.lunchEnabled && (
               <div style={{ display:'flex', flexDirection:'column', gap:16, marginTop:4,
-                padding:'16px', borderRadius:10, background:'#0f172a', border:'1px solid #1e293b' }}>
+                padding:'16px', borderRadius:10, background:'#0f182a', border:'1px solid #1e283b' }}>
 
                 <div>
                   <p style={{ fontSize:11, fontWeight:700, color:'#64748b', textTransform:'uppercase',
@@ -205,7 +205,7 @@ export default function ShiftSettings() {
                     onChange={v => set('lunchDuration', v)} wide
                   />
                   <p style={{ fontSize:11, color:'#475569', marginTop:6 }}>
-                    Lunch ends at: <strong style={{ color:'#94a3b8' }}>{lunchEndLbl}</strong>
+                    Lunch ends at: <strong style={{ color:'#94a0b8' }}>{lunchEndLbl}</strong>
                   </p>
                 </div>
               </div>
@@ -257,7 +257,7 @@ export default function ShiftSettings() {
             style={{
               display:'flex', alignItems:'center', justifyContent:'center', gap:8,
               width:'100%', padding:'11px 0', borderRadius:12,
-              background:'#2563eb', color:'#fff', fontWeight:700, fontSize:14,
+              background:'#2567eb', color:'#fff', fontWeight:700, fontSize:14,
               border:'none', cursor: saving ? 'default' : 'pointer',
               opacity: saving ? 0.7 : 1, transition:'opacity 0.15s',
             }}
@@ -272,9 +272,9 @@ export default function ShiftSettings() {
 
       {/* LIVE PREVIEW */}
       <div style={card}>
-        <h3 style={{ fontSize:14, fontWeight:700, color:'#f1f5f9', margin:'0 0 16px',
+        <h3 style={{ fontSize:14, fontWeight:700, color:'#f1f4f9', margin:'0 0 16px',
           display:'flex', alignItems:'center', gap:8 }}>
-          <Info size={15} style={{ color:'#60a5fa' }} /> Live Preview
+          <Info size={15} style={{ color:'#6093fa' }} /> Live Preview
         </h3>
 
         <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
@@ -283,29 +283,29 @@ export default function ShiftSettings() {
           <PreviewRow color="#eab308" label="Late"
             desc={`Arrived after ${deadlineLabel} — minutes late are recorded`} />
           {form.lunchEnabled && (
-            <PreviewRow color="#60a5fa" label="Lunch Break"
+            <PreviewRow color="#6093fa" label="Lunch Break"
               desc={`${lunchStartLbl} – ${lunchEndLbl} (${form.lunchDuration} min) — kiosk scan during this window is ignored`} />
           )}
-          <PreviewRow color="#94a3b8" label="End of Day"
+          <PreviewRow color="#94a0b8" label="End of Day"
             desc={`Check-out reference: ${endLabel}`} />
         </div>
 
         {/* Net hours summary */}
-        <div style={{ marginTop:16, padding:'14px 16px', borderRadius:10, background:'#0f172a', border:'1px solid #1e293b' }}>
+        <div style={{ marginTop:16, padding:'14px 16px', borderRadius:10, background:'#0f182a', border:'1px solid #1e283b' }}>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
             <span style={{ fontSize:12, color:'#64748b' }}>Gross work hours</span>
-            <span style={{ fontSize:13, fontWeight:700, color:'#94a3b8' }}>
+            <span style={{ fontSize:13, fontWeight:700, color:'#94a0b8' }}>
               {Math.floor(grossMins / 60)}h {grossMins % 60 > 0 ? grossMins % 60 + 'm' : ''}
             </span>
           </div>
           {form.lunchEnabled && (
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
               <span style={{ fontSize:12, color:'#64748b' }}>− Lunch break</span>
-              <span style={{ fontSize:13, fontWeight:700, color:'#60a5fa' }}>− {form.lunchDuration} min</span>
+              <span style={{ fontSize:13, fontWeight:700, color:'#6093fa' }}>− {form.lunchDuration} min</span>
             </div>
           )}
-          <div style={{ borderTop:'1px solid #1e293b', paddingTop:8, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-            <span style={{ fontSize:13, fontWeight:700, color:'#e2e8f0' }}>Net working hours</span>
+          <div style={{ borderTop:'1px solid #1e283b', paddingTop:8, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+            <span style={{ fontSize:13, fontWeight:700, color:'#e2e7f0' }}>Net working hours</span>
             <span style={{ fontSize:15, fontWeight:800, color:'#22c55e' }}>{netLabel}</span>
           </div>
         </div>
@@ -325,8 +325,8 @@ function Section({ title, icon, children }) {
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
       <div style={{ display:'flex', alignItems:'center', gap:7 }}>
-        <span style={{ color:'#60a5fa' }}>{icon}</span>
-        <span style={{ fontSize:13, fontWeight:700, color:'#cbd5e1', textTransform:'uppercase', letterSpacing:'0.05em' }}>{title}</span>
+        <span style={{ color:'#6093fa' }}>{icon}</span>
+        <span style={{ fontSize:13, fontWeight:700, color:'#cbd2e1', textTransform:'uppercase', letterSpacing:'0.05em' }}>{title}</span>
       </div>
       {children}
     </div>
@@ -335,9 +335,9 @@ function Section({ title, icon, children }) {
 
 function NotificationToggle({ label, checked, onChange }) {
   return (
-    <button type="button" onClick={onChange} style={{ display:'flex', alignItems:'center', gap:10, width:'100%', padding:'10px 12px', border:'1px solid #1e293b', borderRadius:9, background:'#0f172a', color: checked ? '#e2e8f0' : '#64748b', cursor:'pointer', textAlign:'left' }}>
-      <span style={{ position:'relative', width:38, height:22, borderRadius:11, background: checked ? '#2563eb' : '#334155', transition:'background .2s', flexShrink:0 }}>
-        <span style={{ position:'absolute', top:3, left: checked ? 19 : 3, width:16, height:16, borderRadius:'50%', background:'#fff', transition:'left .2s' }} />
+    <button type="button" onClick={onChange} style={{ display:'flex', alignItems:'center', gap:10, width:'100%', padding:'10px 12px', border:'1px solid #1e283b', borderRadius:9, background:'#0f182a', color: checked ? '#e2e7f0' : '#64748b', cursor:'pointer', textAlign:'left' }}>
+      <span style={{ position:'relative', width:38, height:22, borderRadius:11, background: checked ? '#2567eb' : '#2a3b5e', transition:'background .2s', flexShrink:0 }}>
+        <span style={{ position:'absolute', top:3, left: checked ? 19 : 3, width:16, height:16, borderRadius:'50%', background:'#f4f8ff', transition:'left .2s' }} />
       </span>
       <span style={{ fontSize:13, fontWeight:600 }}>{label}</span>
     </button>
@@ -353,8 +353,8 @@ function NumField({ label, value, min, max, onChange, wide }) {
         onChange={e => onChange(e.target.value)}
         style={{
           width: wide ? '100%' : 100, padding:'9px 12px', borderRadius:10,
-          background:'#0f172a', border:'1px solid #334155',
-          color:'#f1f5f9', fontSize:15, fontWeight:600,
+          background:'#0f182a', border:'1px solid #333e55',
+          color:'#f1f4f9', fontSize:15, fontWeight:600,
           outline:'none', boxSizing:'border-box',
         }}
       />
@@ -367,7 +367,7 @@ function PreviewRow({ color, label, desc }) {
     <div style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
       <span style={{ width:10, height:10, borderRadius:'50%', background:color, marginTop:3, flexShrink:0 }} />
       <div>
-        <span style={{ fontSize:13, fontWeight:700, color:'#e2e8f0' }}>{label}</span>
+        <span style={{ fontSize:13, fontWeight:700, color:'#e2e7f0' }}>{label}</span>
         <span style={{ fontSize:12, color:'#64748b', marginLeft:8 }}>{desc}</span>
       </div>
     </div>
@@ -375,7 +375,7 @@ function PreviewRow({ color, label, desc }) {
 }
 
 function Divider() {
-  return <div style={{ borderTop:'1px solid #1e293b', margin:'4px 0' }} />;
+  return <div style={{ borderTop:'1px solid #1e283b', margin:'4px 0' }} />;
 }
 
 function Alert({ type, text }) {
@@ -383,7 +383,7 @@ function Alert({ type, text }) {
   return (
     <div style={{
       display:'flex', alignItems:'center', gap:8, padding:'11px 14px', borderRadius:10,
-      background: isErr ? 'rgba(127,29,29,0.4)' : 'rgba(20,83,45,0.4)',
+      background: isErr ? 'rgba(29, 62, 127,0.4)' : 'rgba(20, 41, 83,0.4)',
       border:`1px solid ${isErr ? '#991b1b' : '#166534'}`,
       color: isErr ? '#fca5a5' : '#86efac', fontSize:13,
     }}>
@@ -393,6 +393,6 @@ function Alert({ type, text }) {
   );
 }
 
-const card = { background:'#0f172a', border:'1px solid #1e293b', borderRadius:16, padding:'24px', display:'flex', flexDirection:'column', gap:20 };
+const card = { background:'#0f182a', border:'1px solid #1e283b', borderRadius:16, padding:'24px', display:'flex', flexDirection:'column', gap:20 };
 const hint = { fontSize:12, color:'#64748b', margin:0, lineHeight:1.5 };
 const row  = { display:'flex', gap:24, flexWrap:'wrap' };

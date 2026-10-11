@@ -9,6 +9,8 @@ const attendanceSchema = new mongoose.Schema({
   position:   { type: String, default: '' },
   // YYYY-MM-DD string — used for daily uniqueness check
   date:       { type: String, required: true },
+  timestamp:  { type: Date, default: Date.now, index: true },
+  lastScanAt: { type: Date, default: null },
 
   // ── Morning session ─────────────────────────────────────────────────────────
   checkInTime:  { type: Date, default: Date.now },
@@ -25,6 +27,9 @@ const attendanceSchema = new mongoose.Schema({
   },
   matchConfidence: { type: Number, default: null },
   confidence: { type: Number, min: 0, max: 1, default: null },
+  livenessScore: { type: Number, min: 0, max: 1, default: null },
+  ipAddress: { type: String, default: '' },
+  deviceInfo: { type: String, maxlength: 300, default: '' },
   recognitionMethod: {
     type: String, enum: ['Face Recognition', 'Manual'], default: 'Manual',
   },
@@ -33,7 +38,15 @@ const attendanceSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // One record per employee per day
-attendanceSchema.index({ userId: 1, date: 1 });
+attendanceSchema.index(
+  { userId: 1, date: 1 },
+  {
+    name: 'unique_user_date',
+    unique: true,
+    partialFilterExpression: { userId: { $type: 'objectId' } },
+  },
+);
+attendanceSchema.index({ userId: 1, timestamp: -1 });
 attendanceSchema.index(
   { employee: 1, date: 1 },
   { unique: true, partialFilterExpression: { employee: { $type: 'objectId' } } },

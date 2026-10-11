@@ -41,8 +41,8 @@ function getGreeting() {
 const styles = {
   bar: {
     height: 60,
-    background: '#fff',
-    borderBottom: '1px solid #e2e8f0',
+    background: '#f4f8ff',
+    borderBottom: '1px solid #e2e7f0',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -59,8 +59,8 @@ const styles = {
     gap: 12,
   },
   badge: {
-    background: '#eff6ff',
-    color: '#3b82f6',
+    background: '#f0f5fe',
+    color: '#3b79f6',
     padding: '3px 10px',
     borderRadius: 20,
     fontSize: 12,
@@ -68,7 +68,7 @@ const styles = {
   },
   logoutBtn: {
     background: 'none',
-    border: '1px solid #e2e8f0',
+    border: '1px solid #e2e7f0',
     borderRadius: 6,
     padding: '5px 14px',
     fontSize: 13,

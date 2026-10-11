@@ -10,8 +10,8 @@ import {
 
 /* ── Shared style tokens ─────────────────────────────────────────────────── */
 const CARD = {
-  background:   '#0f172a',
-  border:       '1px solid #1e293b',
+  background:   '#0f182a',
+  border:       '1px solid #1e283b',
   borderRadius: '16px',
 };
 
@@ -71,24 +71,24 @@ export default function UserDashboard() {
       ══════════════════════════════════════════════════════ */}
       <div style={{
         position: 'relative', overflow: 'hidden',
-        background: 'linear-gradient(135deg, #0f2070 0%, #0f172a 100%)',
-        border: '1px solid rgba(37,99,235,0.3)',
+        background: 'linear-gradient(135deg, #0f2f70 0%, #0f182a 100%)',
+        border: '1px solid rgba(37, 103, 235,0.3)',
         borderRadius: '16px', padding: '28px 32px',
       }}>
         {/* Subtle decorative circle */}
         <div style={{
           position: 'absolute', top: '-40px', right: '-40px',
           width: '180px', height: '180px', borderRadius: '50%',
-          background: 'rgba(37,99,235,0.08)', pointerEvents: 'none',
+          background: 'rgba(37, 103, 235,0.08)', pointerEvents: 'none',
         }} />
         <div>
-          <p style={{ fontSize: '0.875rem', color: '#60a5fa', fontWeight: 500, margin: '0 0 6px' }}>
+          <p style={{ fontSize: '0.875rem', color: '#6093fa', fontWeight: 500, margin: '0 0 6px' }}>
             Welcome back
           </p>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#f1f5f9', margin: '0 0 4px', letterSpacing: '-0.03em' }}>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#f1f4f9', margin: '0 0 4px', letterSpacing: '-0.03em' }}>
             {user.fullName}
           </h1>
-          <p style={{ fontSize: '0.875rem', color: '#94a3b8', margin: 0 }}>
+          <p style={{ fontSize: '0.875rem', color: '#94a0b8', margin: 0 }}>
             {user.position} · {user.department}
           </p>
         </div>
@@ -96,7 +96,7 @@ export default function UserDashboard() {
           <p style={{ fontSize: '0.6875rem', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px' }}>
             Employee ID
           </p>
-          <p style={{ fontSize: '1.125rem', fontWeight: 700, fontFamily: 'monospace', color: '#60a5fa', margin: 0 }}>
+          <p style={{ fontSize: '1.125rem', fontWeight: 700, fontFamily: 'monospace', color: '#6093fa', margin: 0 }}>
             {user.employeeId}
           </p>
         </div>
@@ -117,7 +117,7 @@ export default function UserDashboard() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <div style={{
                 padding: '10px', borderRadius: '12px',
-                background: todayRecord.status === 'Present' ? 'rgba(21,128,61,0.2)' : 'rgba(180,83,9,0.2)',
+                background: todayRecord.status === 'Present' ? 'rgba(21, 57, 128,0.2)' : 'rgba(9, 66, 180,0.2)',
               }}>
                 {todayRecord.status === 'Present'
                   ? <CheckCircle2 size={22} color="#4ade80" />
@@ -125,10 +125,10 @@ export default function UserDashboard() {
                 }
               </div>
               <div style={{ flex: 1 }}>
-                <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 700, color: '#f1f5f9' }}>
+                <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 700, color: '#f1f4f9' }}>
                   {todayRecord.status === 'Present' ? 'On Time ✅' : 'Arrived Late ⏰'}
                 </p>
-                <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: '#94a3b8' }}>
+                <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: '#94a0b8' }}>
                   {formatEthiopianTime(todayRecord.checkInTime)}
                 </p>
               </div>
@@ -136,12 +136,12 @@ export default function UserDashboard() {
             </div>
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ padding: '10px', borderRadius: '12px', background: 'rgba(30,41,59,0.6)' }}>
+              <div style={{ padding: '10px', borderRadius: '12px', background: 'rgba(28, 39, 61,0.6)' }}>
                 <XCircle size={22} color="#475569" />
               </div>
               <div>
                 <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 700, color: '#64748b' }}>Not checked in yet</p>
-                <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: '#334155' }}>Use Attendance Set to check in</p>
+                <p style={{ margin: '2px 0 0', fontSize: '0.75rem', color: '#333e55' }}>Use Attendance Set to check in</p>
               </div>
             </div>
           )}
@@ -170,7 +170,7 @@ export default function UserDashboard() {
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', marginBottom: '14px' }}>
-              <span style={{ fontSize: '2.5rem', fontWeight: 800, color: '#60a5fa', lineHeight: 1 }}>
+              <span style={{ fontSize: '2.5rem', fontWeight: 800, color: '#6093fa', lineHeight: 1 }}>
                 {stats.year.rate}%
               </span>
               <span style={{ fontSize: '0.75rem', color: '#64748b', paddingBottom: '4px' }}>
@@ -178,11 +178,11 @@ export default function UserDashboard() {
               </span>
             </div>
             {/* Progress bar */}
-            <div style={{ width: '100%', height: '6px', background: '#1e293b', borderRadius: '999px', overflow: 'hidden', marginBottom: '16px' }}>
+            <div style={{ width: '100%', height: '6px', background: '#1c273d', borderRadius: '999px', overflow: 'hidden', marginBottom: '16px' }}>
               <div style={{
                 height: '100%', borderRadius: '999px',
                 width: `${stats.year.rate}%`,
-                background: stats.year.rate >= 90 ? '#22c55e' : stats.year.rate >= 70 ? '#f59e0b' : '#ef4444',
+                background: stats.year.rate >= 90 ? '#2258c5' : stats.year.rate >= 70 ? '#0e5af2' : '#447def',
                 transition: 'width 0.7s ease',
               }} />
             </div>
@@ -224,10 +224,10 @@ export default function UserDashboard() {
           display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end',
           justifyContent: 'space-between', gap: '12px',
           padding: '20px 24px',
-          borderBottom: '1px solid #1e293b',
-          background: '#0f172a',
+          borderBottom: '1px solid #1e283b',
+          background: '#0f182a',
         }}>
-          <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#e2e8f0', margin: 0 }}>
+          <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#e2e7f0', margin: 0 }}>
             Attendance History
           </h3>
 
@@ -243,7 +243,7 @@ export default function UserDashboard() {
                   fontSize: '0.75rem', color: '#64748b', padding: '2px 4px',
                   transition: 'color 0.12s',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.color = '#94a3b8'; }}
+                onMouseEnter={e => { e.currentTarget.style.color = '#94a0b8'; }}
                 onMouseLeave={e => { e.currentTarget.style.color = '#64748b'; }}
               >
                 Clear
@@ -254,15 +254,15 @@ export default function UserDashboard() {
 
         {/* Table body */}
         {loadingRec ? (
-          <div style={{ background: '#0f172a' }}><Spinner /></div>
+          <div style={{ background: '#0f182a' }}><Spinner /></div>
         ) : recErr ? (
           <ErrBox msg={recErr} />
         ) : (
           <>
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem', background: '#0f172a' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem', background: '#0f182a' }}>
                 <thead>
-                  <tr style={{ background: 'rgba(30,41,59,0.7)', borderBottom: '1px solid #1e293b' }}>
+                  <tr style={{ background: 'rgba(28, 39, 61,0.7)', borderBottom: '1px solid #1e283b' }}>
                     {[
                       { label: 'Date',          minWidth: '120px' },
                       { label: 'Day',           minWidth: '120px' },
@@ -300,7 +300,7 @@ export default function UserDashboard() {
             {pagination.totalPages > 1 && (
               <div style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '12px 24px', borderTop: '1px solid #1e293b', background: '#0f172a',
+                padding: '12px 24px', borderTop: '1px solid #1e283b', background: '#0f182a',
               }}>
                 <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
                   Page {pagination.page} of {pagination.totalPages} · {pagination.total} records
@@ -334,22 +334,22 @@ function KioskCTA() {
       style={{
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         gap: '14px', textDecoration: 'none',
-        background: hovered ? 'rgba(29,78,216,0.25)' : 'rgba(29,78,216,0.12)',
-        border: '1px solid rgba(37,99,235,0.35)',
+        background: hovered ? 'rgba(29, 91, 216,0.25)' : 'rgba(29, 91, 216,0.12)',
+        border: '1px solid rgba(37, 103, 235,0.35)',
         borderRadius: '16px', padding: '24px',
         transition: 'background 0.15s',
       }}
     >
       <div style={{
         width: '52px', height: '52px', borderRadius: '14px',
-        background: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: '#2567eb', display: 'flex', alignItems: 'center', justifyContent: 'center',
         transform: hovered ? 'scale(1.08)' : 'scale(1)', transition: 'transform 0.15s',
-        boxShadow: '0 4px 14px rgba(37,99,235,0.4)',
+        boxShadow: '0 4px 14px rgba(37, 103, 235,0.4)',
       }}>
         <Camera size={24} color="#ffffff" />
       </div>
       <div style={{ textAlign: 'center' }}>
-        <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 700, color: '#93c5fd' }}>
+        <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 700, color: '#93b6fd' }}>
           Check In with Face
         </p>
         <p style={{ margin: '3px 0 0', fontSize: '0.75rem', color: '#475569' }}>
@@ -372,12 +372,12 @@ function DateFilter({ label, value, onChange }) {
         onChange={onChange}
         style={{
           padding: '7px 10px', borderRadius: '8px',
-          background: '#1e293b', border: '1.5px solid #334155',
-          color: '#e2e8f0', fontSize: '0.75rem', outline: 'none',
+          background: '#1c273d', border: '1.5px solid #333e55',
+          color: '#e2e7f0', fontSize: '0.75rem', outline: 'none',
           transition: 'border-color 0.12s',
         }}
-        onFocus={e => { e.target.style.borderColor = '#3b82f6'; }}
-        onBlur={e  => { e.target.style.borderColor = '#334155'; }}
+        onFocus={e => { e.target.style.borderColor = '#3b79f6'; }}
+        onBlur={e  => { e.target.style.borderColor = '#333e55'; }}
       />
     </div>
   );
@@ -387,17 +387,17 @@ function HistoryRow({ r }) {
   const [hovered, setHovered] = useState(false);
   const cell = {
     padding: '16px 20px', fontSize: '0.875rem',
-    borderBottom: '1px solid #1e293b',
-    background: hovered ? 'rgba(30,41,59,0.5)' : 'transparent',
+    borderBottom: '1px solid #1e283b',
+    background: hovered ? 'rgba(28, 39, 61,0.5)' : 'transparent',
     transition: 'background 0.1s',
   };
   return (
     <tr onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
-      <td style={{ ...cell, fontFamily: 'monospace', color: '#cbd5e1', fontSize: '0.8125rem' }}>{r.date}</td>
-      <td style={{ ...cell, color: '#94a3b8', fontSize: '0.8125rem' }}>
+      <td style={{ ...cell, fontFamily: 'monospace', color: '#cbd2e1', fontSize: '0.8125rem' }}>{r.date}</td>
+      <td style={{ ...cell, color: '#94a0b8', fontSize: '0.8125rem' }}>
         {formatEthiopianDate(r.date, { weekday: 'long' })}
       </td>
-      <td style={{ ...cell, fontFamily: 'monospace', color: '#cbd5e1', fontSize: '0.8125rem' }}>
+      <td style={{ ...cell, fontFamily: 'monospace', color: '#cbd2e1', fontSize: '0.8125rem' }}>
         {formatEthiopianTime(r.checkInTime, { seconds: true })}
       </td>
       <td style={cell}><StatusBadge status={r.status} /></td>
@@ -412,8 +412,8 @@ function PaginationBtn({ disabled, onClick, children }) {
       onClick={onClick}
       style={{
         padding: '6px 8px', borderRadius: '8px',
-        background: '#1e293b', border: '1px solid #334155',
-        color: '#94a3b8', cursor: disabled ? 'not-allowed' : 'pointer',
+        background: '#1c273d', border: '1px solid #333e55',
+        color: '#94a0b8', cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 0.3 : 1, display: 'flex', alignItems: 'center',
       }}
     >
@@ -423,9 +423,9 @@ function PaginationBtn({ disabled, onClick, children }) {
 }
 
 const chipColors = {
-  green: { bg: 'rgba(21,128,61,0.18)',  border: 'rgba(21,128,61,0.4)',  text: '#4ade80' },
-  amber: { bg: 'rgba(180,83,9,0.18)',   border: 'rgba(180,83,9,0.4)',   text: '#fbbf24' },
-  red:   { bg: 'rgba(185,28,28,0.18)',  border: 'rgba(185,28,28,0.4)',  text: '#f87171' },
+  green: { bg: 'rgba(21, 57, 128,0.18)',  border: 'rgba(21,128,61,0.4)',  text: '#4ade80' },
+  amber: { bg: 'rgba(9, 66, 180,0.18)',   border: 'rgba(180,83,9,0.4)',   text: '#fbbf24' },
+  red:   { bg: 'rgba(28, 80, 185,0.18)',  border: 'rgba(185,28,28,0.4)',  text: '#f87171' },
 };
 
 function StatChip({ label, value, color, icon: Icon }) {
@@ -457,11 +457,11 @@ function MiniChip({ label, value, color }) {
 
 function StatusBadge({ status }) {
   const map = {
-    Present: { bg: 'rgba(21,128,61,0.25)',  color: '#86efac', border: 'rgba(21,128,61,0.4)'  },
-    Late:    { bg: 'rgba(180,83,9,0.25)',   color: '#fcd34d', border: 'rgba(180,83,9,0.4)'   },
-    Absent:  { bg: 'rgba(185,28,28,0.25)',  color: '#fca5a5', border: 'rgba(185,28,28,0.4)'  },
+    Present: { bg: 'rgba(21, 57, 128,0.25)',  color: '#86efac', border: 'rgba(21,128,61,0.4)'  },
+    Late:    { bg: 'rgba(9, 66, 180,0.25)',   color: '#fcd34d', border: 'rgba(180,83,9,0.4)'   },
+    Absent:  { bg: 'rgba(28, 80, 185,0.25)',  color: '#fca5a5', border: 'rgba(185,28,28,0.4)'  },
   };
-  const s = map[status] ?? { bg: 'rgba(30,41,59,0.5)', color: '#94a3b8', border: '#334155' };
+  const s = map[status] ?? { bg: 'rgba(28, 39, 61,0.5)', color: '#94a0b8', border: '#333e55' };
   return (
     <span style={{
       display: 'inline-block',
@@ -478,7 +478,7 @@ function ErrBox({ msg }) {
   return (
     <div style={{
       margin: '16px', padding: '14px 16px', borderRadius: '12px',
-      background: 'rgba(127,29,29,0.3)', border: '1px solid #991b1b',
+      background: 'rgba(29, 62, 127,0.3)', border: '1px solid #991b1b',
       color: '#fca5a5', fontSize: '0.875rem',
     }}>
       {msg}

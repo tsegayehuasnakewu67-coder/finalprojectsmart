@@ -2,6 +2,7 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const mongoose = require('mongoose');
+const { getDefaultEmployeePassword } = require('./utils/passwordPolicy');
 const connectDB = require('./config/db');
 const User = require('./models/User');
 const Employee = require('./models/Employee');
@@ -65,6 +66,7 @@ const main = async () => {
     }
 
     const employees = [];
+    const defaultPassword = getDefaultEmployeePassword();
     for (const sample of employeeSeedList) {
       let employee = await Employee.findOne({ employeeId: sample.employeeId });
       if (!employee) {
@@ -79,12 +81,19 @@ const main = async () => {
           name: `${sample.firstName} ${sample.lastName}`,
           employeeId: sample.employeeId,
           email: sample.email,
-          password: 'Employee@123',
+          password: defaultPassword,
           department: sample.department,
           position: sample.position,
           role: 'employee',
           isActive: true,
+          mustChangePassword: true,
+          passwordChangedAt: null,
         });
+      } else {
+        user.password = defaultPassword;
+        user.mustChangePassword = true;
+        user.passwordChangedAt = null;
+        await user.save();
       }
       if (user) await syncEmployeeForUser(user);
     }

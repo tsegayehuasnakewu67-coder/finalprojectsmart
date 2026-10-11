@@ -28,13 +28,22 @@ export function AuthProvider({ children }) {
     return () => window.removeEventListener('sat:unauthorized', handleUnauthorized);
   }, []);
 
-  const login = useCallback(async (email, password) => {
-    const r = await api.post('/auth/login', { email, password });
+  const login = useCallback(async (identifier, password) => {
+    const r = await api.post('/auth/login', { identifier, password });
     const { user: u, token: t } = r.data.data;
     localStorage.setItem('sat_token', t);
     setToken(t);
     setUser(u);
     return u;
+  }, []);
+
+  const changePassword = useCallback(async (payload) => {
+    const r = await api.post('/auth/change-password', payload);
+    const { user: updatedUser, token: updatedToken } = r.data.data;
+    localStorage.setItem('sat_token', updatedToken);
+    setToken(updatedToken);
+    setUser(updatedUser);
+    return updatedUser;
   }, []);
 
   const logout = useCallback(() => {
@@ -44,7 +53,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, changePassword, logout }}>
       {children}
     </AuthContext.Provider>
   );

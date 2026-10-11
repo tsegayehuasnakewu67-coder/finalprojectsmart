@@ -3,7 +3,10 @@ const User           = require('../models/User');
 const ShiftSettings  = require('../models/ShiftSettings');
 const Notification   = require('../models/Notification');
 const Employee       = require('../models/Employee');
-const { findBestMatch } = require('../utils/faceMatcher');
+const { consumeLivenessChallenge } = require('../utils/livenessChallenge');
+const { recognizeFace } = require('../services/faceRecognitionService');
+const { logFailedFaceScan } = require('../utils/faceScanAudit');
+const { isValidFaceDescriptor } = require('../utils/faceMatcher');
 const {
   getAddisAbabaDateString,
   getAddisAbabaMinutes,
@@ -111,15 +114,46 @@ const lateLabel = (mins) =>
 
 const notifyAttendanceEvent = async (employee, shift, event, details) => {
   const enabled = event === 'check-in' ? shift.notifyCheckIn !== false : shift.notifyCheckOut !== false;
-  if (!enabled) return;
+  if (!enabled || !employee._id) return;
   const isLate = event === 'check-in' && details.status === 'Late';
-  await Notification.create({
-    recipient: employee._id,
-    sender: employee._id,
-    type: isLate ? 'warning' : 'message',
-    subject: isLate ? 'Late attendance warning' : `Attendance ${event}`,
-    message: `${employee.fullName}, your ${event} was recorded at ${fmtTime(details.time)}${isLate ? ` (${lateLabel(details.lateMinutes)}).` : '.'}${details.auto ? ' This checkout was applied automatically at the configured shift end.' : ''}`,
-  });
+  try {
+    await Notification.create({
+      recipient: employee._id,
+      sender: employee._id,
+      type: isLate ? 'warning' : 'message',
+      subject: isLate ? 'Late attendance warning' : `Attendance ${event}`,
+      message: `${employee.fullName}, your ${event} was recorded at ${fmtTime(details.time)}${isLate ? ` (${lateLabel(details.lateMinutes)}).` : '.'}${details.auto ? ' This checkout was applied automatically at the configured shift end.' : ''}`,
+    });
+  } catch (error) {
+    console.error('Attendance was recorded, but its notification could not be saved.', {
+      name: error.name,
+      code: error.code,
+    });
+  }
+};
+
+const findAttendanceRecord = (employee, date) => Attendance.findOne(
+  employee._id
+    ? { userId: employee._id, date }
+    : { employee: employee.employeeRef, date },
+);
+
+const claimScanWindow = async (employee, date, now) => {
+  const existing = await findAttendanceRecord(employee, date);
+  if (!existing) return { record: null, duplicate: false };
+
+  const record = await Attendance.findOneAndUpdate({
+    _id: existing._id,
+    $or: [
+      { lastScanAt: null },
+      { lastScanAt: { $lte: new Date(now.getTime() - 30_000) } },
+    ],
+  }, {
+    $set: { lastScanAt: now, timestamp: now, livenessScore: 1 },
+  }, { new: true });
+  return record
+    ? { record, duplicate: false }
+    : { record: existing, duplicate: true };
 };
 
 /**
@@ -164,6 +198,7 @@ const resolveSessionAction = (record, now, shift) => {
 
   // ── No record yet ──────────────────────────────────────────────────────────
   if (!record) {
+    if (nowMins >= shiftEnd) return 'closed';
     if (nowMins < earlyWindow) return 'too_early';
 
     if (shift.lunchEnabled) {
@@ -222,23 +257,28 @@ const resolveSessionAction = (record, now, shift) => {
 // ─────────────────────────────────────────────────────────────────────────────
 const markAttendance = async (req, res) => {
   try {
-    const { faceDescriptor } = req.body;
-    if (!Array.isArray(faceDescriptor) || faceDescriptor.length !== 128) {
+    const { faceDescriptor, livenessProof } = req.body || {};
+    if (!isValidFaceDescriptor(faceDescriptor)) {
+      await logFailedFaceScan(req, { reason: 'invalid_descriptor' });
       return res.status(400).json({ success: false, message: 'Invalid face descriptor.' });
     }
-
-    const employees = await User.find({
-      isActive: true,
-      'faceDescriptor.0': { $exists: true },
-    }).select('fullName employeeId department position faceDescriptor employeeRef');
-
-    if (!employees.length) {
-      return res.status(404).json({ success: false, message: 'No registered faces found.' });
+    if (!(await consumeLivenessChallenge(livenessProof))) {
+      await logFailedFaceScan(req, { reason: 'liveness_failed' });
+      return res.status(403).json({
+        success: false,
+        message: 'Camera liveness verification failed or expired. Please try the live camera check again.',
+      });
     }
 
-    const { matched, employee, distance } = findBestMatch(faceDescriptor, employees);
+    const recognition = await recognizeFace(faceDescriptor);
+    const { matched, employee, distance, hasCandidates } = recognition;
+    if (!hasCandidates) {
+      await logFailedFaceScan(req, { reason: 'no_registered_faces' });
+      return res.status(404).json({ success: false, message: 'No registered faces found.' });
+    }
     if (!matched) {
-      return res.status(401).json({
+      await logFailedFaceScan(req, { reason: 'unknown_face', distance });
+      return res.status(404).json({
         success: false,
         message: 'Face not recognised. Contact HR to register your face.',
       });
@@ -248,7 +288,14 @@ const markAttendance = async (req, res) => {
     const now   = new Date();
     const shift = await getShift();
 
-    const record = await Attendance.findOne({ userId: employee._id, date: today });
+    const { record, duplicate } = await claimScanWindow(employee, today, now);
+    if (duplicate) {
+      return res.status(409).json({
+        success: false,
+        alreadyScanned: true,
+        message: 'This employee was scanned recently. Please wait 30 seconds before scanning again.',
+      });
+    }
     const action = resolveSessionAction(record, now, shift);
 
     const empInfo = {
@@ -256,6 +303,7 @@ const markAttendance = async (req, res) => {
       employeeId: employee.employeeId,
       department: employee.department,
       position:   employee.position || '',
+      photo:      employee.avatar || '',
     };
 
     // ── too_early ─────────────────────────────────────────────────────────────
@@ -267,6 +315,14 @@ const markAttendance = async (req, res) => {
         tooEarly: true,
         message: `Check-in is not open yet. Come back at ${fmtTime(opensAt)}.`,
         data: { employee: empInfo },
+      });
+    }
+
+    if (action === 'closed') {
+      return res.status(400).json({
+        success: false,
+        kioskClosed: true,
+        message: 'Check-in is closed for today. Please return during scheduled work hours.',
       });
     }
 
@@ -337,10 +393,14 @@ const markAttendance = async (req, res) => {
         lateMinutes,
         matchConfidence: parseFloat(distance.toFixed(4)),
         confidence:      parseFloat(distance.toFixed(4)),
+        livenessScore:   1,
+        timestamp:      now,
+        lastScanAt:     now,
+        ipAddress:       req.ip || '',
+        deviceInfo:      String(req.get('user-agent') || '').slice(0, 300),
         recognitionMethod: 'Face Recognition',
       });
       await notifyAttendanceEvent(employee, shift, 'check-in', { time: now, status, lateMinutes });
-      await notifyAttendanceEvent(employee, shift, 'check-in', { time: now, status: newRecord.status, lateMinutes: 0 });
 
       return res.status(201).json({
         success: true,
@@ -374,6 +434,11 @@ const markAttendance = async (req, res) => {
         lateMinutes:       0,
         matchConfidence:   parseFloat(distance.toFixed(4)),
         confidence:        parseFloat(distance.toFixed(4)),
+        livenessScore:     1,
+        timestamp:         now,
+        lastScanAt:        now,
+        ipAddress:         req.ip || '',
+        deviceInfo:        String(req.get('user-agent') || '').slice(0, 300),
         recognitionMethod: 'Face Recognition',
       });
 
@@ -473,6 +538,14 @@ const markAttendance = async (req, res) => {
 
   } catch (err) {
     console.error('MarkAttendance error:', err);
+    await logFailedFaceScan(req, { reason: 'server_error' });
+    if (err.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        alreadyScanned: true,
+        message: 'Attendance was recorded by another scan. Please wait before trying again.',
+      });
+    }
     return res.status(500).json({ success: false, message: 'Server error during check-in.' });
   }
 };
@@ -495,24 +568,29 @@ const markAttendance = async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 const checkOutAttendance = async (req, res) => {
   try {
-    const { faceDescriptor } = req.body;
-    if (!Array.isArray(faceDescriptor) || faceDescriptor.length !== 128) {
+    const { faceDescriptor, livenessProof } = req.body || {};
+    if (!isValidFaceDescriptor(faceDescriptor)) {
+      await logFailedFaceScan(req, { reason: 'invalid_descriptor' });
       return res.status(400).json({ success: false, message: 'Invalid face descriptor.' });
+    }
+    if (!(await consumeLivenessChallenge(livenessProof))) {
+      await logFailedFaceScan(req, { reason: 'liveness_failed' });
+      return res.status(403).json({
+        success: false,
+        message: 'Camera liveness verification failed or expired. Please try the live camera check again.',
+      });
     }
 
     /* ── Face recognition ── */
-    const employees = await User.find({
-      isActive: true,
-      'faceDescriptor.0': { $exists: true },
-    }).select('fullName employeeId department position faceDescriptor');
-
-    if (!employees.length) {
+    const recognition = await recognizeFace(faceDescriptor);
+    const { matched, employee, distance, hasCandidates } = recognition;
+    if (!hasCandidates) {
+      await logFailedFaceScan(req, { reason: 'no_registered_faces' });
       return res.status(404).json({ success: false, message: 'No registered faces found.' });
     }
-
-    const { matched, employee, distance } = findBestMatch(faceDescriptor, employees);
     if (!matched) {
-      return res.status(401).json({
+      await logFailedFaceScan(req, { reason: 'unknown_face', distance });
+      return res.status(404).json({
         success: false,
         message: 'Face not recognised. Contact HR to register your face.',
       });
@@ -522,15 +600,23 @@ const checkOutAttendance = async (req, res) => {
     const now   = new Date();
     const shift = await getShift();
 
+    const { record, duplicate } = await claimScanWindow(employee, today, now);
+    if (duplicate) {
+      return res.status(409).json({
+        success: false,
+        alreadyScanned: true,
+        message: 'This employee was scanned recently. Please wait 30 seconds before scanning again.',
+      });
+    }
     const empInfo = {
       fullName:   employee.fullName,
       employeeId: employee.employeeId,
       department: employee.department,
       position:   employee.position || '',
+      photo:      employee.avatar || '',
     };
 
     /* ── Must have checked in today ── */
-    const record = await Attendance.findOne({ userId: employee._id, date: today });
     if (!record) {
       return res.status(400).json({
         success: false,
@@ -642,6 +728,14 @@ const checkOutAttendance = async (req, res) => {
 
   } catch (err) {
     console.error('CheckOut error:', err);
+    await logFailedFaceScan(req, { reason: 'server_error' });
+    if (err.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        alreadyScanned: true,
+        message: 'Attendance was recorded by another scan. Please wait before trying again.',
+      });
+    }
     return res.status(500).json({ success: false, message: 'Server error during check-out.' });
   }
 };
@@ -1137,4 +1231,6 @@ module.exports = {
   getDashboard,
   getMyStats,
   getAnalytics,
+  notifyAttendanceEvent,
+  resolveSessionAction,
 };

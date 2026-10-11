@@ -1,6 +1,6 @@
 /**
  * Euclidean distance face-vector matcher.
- * Threshold < 0.6 is considered a match (face-api.js convention).
+ * A descriptor is a match only when Euclidean distance is strictly below 0.6.
  */
 
 const euclideanDistance = (a, b) => {
@@ -12,6 +12,10 @@ const euclideanDistance = (a, b) => {
   }
   return Math.sqrt(sum);
 };
+
+const isValidFaceDescriptor = (descriptor) => Array.isArray(descriptor)
+  && descriptor.length === 128
+  && descriptor.every((value) => typeof value === 'number' && Number.isFinite(value) && Math.abs(value) <= 2);
 
 /**
  * Find the closest matching employee from a list.
@@ -30,10 +34,10 @@ const findBestMatch = (incoming, employees, threshold = 0.6) => {
     if (dist < bestDist) { bestDist = dist; best = emp; }
   }
 
-  if (bestDist <= threshold) {
+  if (bestDist < threshold) {
     return { matched: true, employee: best, distance: bestDist };
   }
   return { matched: false, employee: null, distance: bestDist };
 };
 
-module.exports = { euclideanDistance, findBestMatch };
+module.exports = { euclideanDistance, isValidFaceDescriptor, findBestMatch };

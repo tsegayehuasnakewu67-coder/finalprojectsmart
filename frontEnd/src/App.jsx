@@ -21,13 +21,16 @@ import ShiftSettings    from './pages/admin/ShiftSettings';
 import UserDashboard    from './pages/user/UserDashboard';
 import Notifications    from './pages/Notifications';
 import LeaveManagement  from './pages/LeaveManagement';
+import ChangePassword  from './pages/ChangePassword';
+import ForgotPassword  from './pages/ForgotPassword';
+import ResetPassword   from './pages/ResetPassword';
 
 export default function App() {
   const { user, loading } = useAuth();
   if (loading) return <Spinner fullScreen />;
 
   const home = user
-    ? ({ admin: '/admin', hr: '/hr', employee: '/me' }[user.role] || '/')
+    ? (user.mustChangePassword ? '/change-password' : ({ admin: '/admin', hr: '/hr', employee: '/me' }[user.role] || '/'))
     : '/';
 
   return (
@@ -39,8 +42,13 @@ export default function App() {
       <Route path="/contact"  element={user ? <Navigate to={home} replace /> : <HomePage page="contact" />} />
       <Route path="/login"   element={user ? <Navigate to={home} replace /> : <Login />} />
       <Route path="/signup"  element={user ? <Navigate to={home} replace /> : <Signup />} />
+      <Route path="/forgot-password" element={user ? <Navigate to={home} replace /> : <ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/setup"   element={user ? <Navigate to={home} replace /> : <AdminSetup />} />
       <Route path="/kiosk"   element={<MarkAttendance />} />
+      <Route element={<ProtectedRoute requirePasswordChange />}>
+        <Route path="/change-password" element={<ChangePassword />} />
+      </Route>
 
       {/* ── Admin ───────────────────────────────────────────── */}
       <Route element={<ProtectedRoute role="admin" />}>

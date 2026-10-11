@@ -19,7 +19,11 @@ api.interceptors.response.use(
       localStorage.removeItem('sat_token');
       window.dispatchEvent(new Event('sat:unauthorized'));
     }
-    return Promise.reject(new Error(err.response?.data?.message || err.message || 'Request failed'));
+    const requestError = new Error(err.response?.data?.message || err.message || 'Request failed');
+    requestError.response = err.response;
+    requestError.code = err.code;
+    requestError.config = err.config;
+    return Promise.reject(requestError);
   }
 );
 

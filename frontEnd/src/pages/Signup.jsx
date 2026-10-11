@@ -14,6 +14,64 @@ import {
   ArrowLeft, Eye, EyeOff, X, RefreshCw, Loader2,
 } from 'lucide-react';
 
+const BACKGROUND_IMAGES = [
+  'mau7.jfif',
+  'mau1.jfif',
+  'mau2.jfif',
+  'mau3.jfif',
+  'mau4.jfif',
+  'mau5.jfif',
+  'mau6.jfif',
+];
+
+const BACKGROUND_STYLES = `
+  .signup-background {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background: #0a2e31;
+  }
+
+  .signup-background::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(135deg, rgba(8, 40, 43, 0.42), rgba(14, 69, 73, 0.32) 52%, rgba(8, 46, 50, 0.5)),
+      radial-gradient(circle at 50% 45%, rgba(45, 212, 191, 0.18), rgba(2, 25, 18, 0.24));
+  }
+
+  .signup-background-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    opacity: 0;
+    transform: scale(1.06);
+    filter: brightness(1.18) saturate(1.08);
+    animation: signupBackgroundCycle 42s ease-in-out infinite;
+  }
+
+  @keyframes signupBackgroundCycle {
+    0%, 12% { opacity: 1; transform: scale(1.04); }
+    17%, 100% { opacity: 0; transform: scale(1.12); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .signup-background-image {
+      animation: none;
+      opacity: 0;
+      transform: none;
+    }
+
+    .signup-background-image:first-child { opacity: 1; }
+  }
+`;
+
 const INIT = {
   fullName: '', employeeId: '', email: '',
   password: '', confirmPassword: '',
@@ -175,19 +233,31 @@ export default function Signup() {
   const cameraVisible = [CAM.OPENING, CAM.LIVE, CAM.SCANNING, CAM.DONE, CAM.ERROR].includes(camPhase);
 
   return (
-    <div className="min-h-screen bg-[#020617] py-10 px-4 flex items-start justify-center">
-      <div className="w-full max-w-2xl">
+    <div className="legacy-page relative isolate min-h-screen overflow-hidden bg-gradient-to-br from-emerald-800 via-emerald-700 to-green-900 py-10 px-4 flex items-start justify-center">
+      <style>{BACKGROUND_STYLES}</style>
+      <div className="signup-background" aria-hidden="true">
+        {BACKGROUND_IMAGES.map((image, index) => (
+          <img
+            key={image}
+            className="signup-background-image"
+            src={`/login-backgrounds/${image}`}
+            alt=""
+            style={{ animationDelay: `-${index * 6}s` }}
+          />
+        ))}
+      </div>
+      <div className="relative z-10 w-full max-w-2xl">
 
         {/* Brand */}
         <div className="flex flex-col items-center mb-7">
           <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center mb-3 shadow-lg shadow-blue-900/40 overflow-hidden p-1">
-            <img src="/mau-logo.svg" alt="Mekdela Abba University logo" className="w-full h-full object-contain rounded-xl" />
+            <img src="/mau-logo.png" alt="Mekdela Amba University logo" className="w-full h-full object-contain rounded-xl" />
           </div>
           <h1 className="text-2xl font-extrabold text-slate-100 tracking-tight">Smart Attendance System</h1>
           <p className="text-sm text-slate-500 mt-1">Corporate Attendance System</p>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-7 shadow-2xl space-y-5">
+        <div className="bg-[#0d3d3f] border border-[#2eb8a6] rounded-2xl p-7 shadow-2xl space-y-5">
 
           <div className="flex items-center justify-between">
             <h2 className="text-base font-bold text-slate-200">Create your account</h2>
@@ -293,7 +363,7 @@ export default function Signup() {
                     )}
 
                     <button type="button" onClick={closeCamera}
-                      className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/50 hover:bg-black/80 text-white transition-colors">
+                      className="absolute top-2 right-2 p-1.5 rounded-lg bg-green/50 hover:bg-green/80 text-white transition-colors">
                       <X size={14}/>
                     </button>
                   </div>
@@ -352,7 +422,7 @@ export default function Signup() {
 
             {/* Manual submit button — always available */}
             <button type="submit" disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-sm font-bold text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-[#22c55e] via-[#14b8a6] to-[#0ea5e9] hover:brightness-110 text-sm font-bold text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
               {loading ? <><Loader2 size={16} className="spin"/> Saving…</> : <><UserPlus size={16}/> Create Account</>}
             </button>
 
@@ -369,7 +439,7 @@ export default function Signup() {
 }
 
 /* ── Field components ────────────────────────────────────── */
-const inputBase = 'w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-100 text-sm focus:outline-none focus:border-blue-500 transition-colors';
+const inputBase = 'w-full px-3.5 py-2.5 rounded-xl bg-[#0b2f32] border border-[#2fa89d] text-slate-100 text-sm focus:outline-none focus:border-[#5eead4] transition-colors';
 
 function SelectField({ label, name, value, onChange, options, required }) {
   const uid = `su_${name}`;

@@ -42,7 +42,7 @@ export default function Dashboard() {
 
       {/* ── KPI Cards ── */}
       <div style={styles.kpiGrid}>
-        <KpiCard label="Total Employees"   value={summary.totalEmployees}  color="#3b82f6" icon="👥" />
+        <KpiCard label="Total Employees"   value={summary.totalEmployees}  color="#3b79f6" icon="👥" />
         <KpiCard label="Present Today"     value={summary.presentToday}    color="#22c55e" icon="✅" />
         <KpiCard label="Late Today"        value={summary.lateToday}       color="#f59e0b" icon="⏰" />
         <KpiCard label="Absent Today"      value={summary.absentToday}     color="#ef4444" icon="❌" />
@@ -88,7 +88,7 @@ export default function Dashboard() {
               <XAxis type="number" tick={{ fontSize: 11 }} />
               <YAxis dataKey="_id" type="category" tick={{ fontSize: 11 }} />
               <Tooltip />
-              <Bar dataKey="count" name="Check-ins" fill="#3b82f6" radius={[0,3,3,0]} />
+              <Bar dataKey="count" name="Check-ins" fill="#3b79f6" radius={[0,3,3,0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -97,7 +97,7 @@ export default function Dashboard() {
         <div style={styles.chartCard}>
           <h3 style={styles.chartTitle}>Recent Check-ins</h3>
           <div style={styles.recentList}>
-            {recentCheckIns.length === 0 && <p style={{ color: '#94a3b8', fontSize: 13 }}>No check-ins today yet.</p>}
+            {recentCheckIns.length === 0 && <p style={{ color: '#94a0b8', fontSize: 13 }}>No check-ins today yet.</p>}
             {recentCheckIns.map((r) => (
               <div key={r._id} style={styles.recentRow}>
                 <div>
@@ -137,12 +137,12 @@ function KpiCard({ label, value, color, icon }) {
 
 function StatusBadge({ status }) {
   const map = { Present: ['#dcfce7','#16a34a'], Late: ['#fef9c3','#ca8a04'], Absent: ['#fee2e2','#dc2626'] };
-  const [bg, fg] = map[status] ?? ['#f1f5f9','#64748b'];
+  const [bg, fg] = map[status] ?? ['#f1f4f9','#64748b'];
   return <span style={{ background: bg, color: fg, borderRadius: 20, padding: '2px 8px', fontSize: 11, fontWeight: 600 }}>{status}</span>;
 }
 
 const styles = {
-  pageTitle: { margin: '0 0 4px', fontSize: 22, fontWeight: 700, color: '#0f172a' },
+  pageTitle: { margin: '0 0 4px', fontSize: 22, fontWeight: 700, color: '#0f182a' },
   pageSub:   { margin: '0 0 24px', color: '#64748b', fontSize: 13 },
   error: { color: '#dc2626', padding: 16 },
   kpiGrid: {
@@ -152,7 +152,7 @@ const styles = {
     marginBottom: 24,
   },
   kpiCard: {
-    background: '#fff',
+    background: '#f4f8ff',
     borderRadius: 12,
     padding: '20px 20px 16px',
     boxShadow: '0 1px 3px rgba(0,0,0,0.07)',
@@ -168,22 +168,22 @@ const styles = {
     marginBottom: 24,
   },
   chartCard: {
-    background: '#fff',
+    background: '#f4f8ff',
     borderRadius: 12,
     padding: '20px 20px 16px',
     boxShadow: '0 1px 3px rgba(0,0,0,0.07)',
   },
   chartTitle: { margin: '0 0 16px', fontSize: 14, fontWeight: 600, color: '#374151' },
   recentList: { display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 180, overflowY: 'auto' },
-  recentRow:  { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid #f1f5f9' },
-  recentName: { margin: 0, fontSize: 13, fontWeight: 600, color: '#1e293b' },
-  recentDept: { margin: 0, fontSize: 11, color: '#94a3b8' },
+  recentRow:  { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid #f1f4f9' },
+  recentName: { margin: 0, fontSize: 13, fontWeight: 600, color: '#1e283b' },
+  recentDept: { margin: 0, fontSize: 11, color: '#94a0b8' },
   recentTime: { margin: '0 0 3px', fontSize: 12, fontWeight: 600, color: '#475569' },
   viewAllBtn: {
     marginTop: 12,
     background: 'none',
     border: 'none',
-    color: '#3b82f6',
+    color: '#3b79f6',
     fontSize: 13,
     fontWeight: 600,
     cursor: 'pointer',

@@ -3,9 +3,9 @@
  * Props:
  *   fullScreen {boolean} — centres spinner in the full viewport
  *   size       {number}  — diameter in px (default 40)
- *   color      {string}  — spinner colour (default #3b82f6)
+ *   color      {string}  — spinner colour (default #3b79f6)
  */
-export default function LoadingSpinner({ fullScreen = false, size = 40, color = '#3b82f6' }) {
+export default function LoadingSpinner({ fullScreen = false, size = 40, color = '#3b79f6' }) {
   const spinner = (
     <div style={{ ...styles.spinner, width: size, height: size, borderTopColor: color }} />
   );
@@ -24,7 +24,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: 'rgba(255,255,255,0.85)',
+    background: 'rgba(15, 23, 42, 0.72)',
     zIndex: 9999,
   },
   inline: {
@@ -35,8 +35,8 @@ const styles = {
   },
   spinner: {
     borderRadius: '50%',
-    border: '4px solid #e2e8f0',
-    borderTopColor: '#3b82f6',
+    border: '4px solid #e2e7f0',
+    borderTopColor: '#3b79f6',
     animation: 'spin 0.75s linear infinite',
   },
 };

@@ -158,7 +158,7 @@ export default function Employees() {
       {deleteId && (
         <div style={styles.modalOverlay}>
           <div style={styles.modal}>
-            <h3 style={{ margin: '0 0 12px', color: '#0f172a' }}>Delete Employee</h3>
+            <h3 style={{ margin: '0 0 12px', color: '#0f182a' }}>Delete Employee</h3>
             <p style={{ color: '#64748b', marginBottom: 20 }}>
               This will permanently delete the employee and all their attendance records. This cannot be undone.
             </p>
@@ -178,8 +178,8 @@ export default function Employees() {
 function RoleBadge({ role }) {
   return (
     <span style={{
-      background: role === 'admin' ? '#ede9fe' : '#eff6ff',
-      color: role === 'admin' ? '#7c3aed' : '#3b82f6',
+      background: role === 'admin' ? '#e9f0fe' : '#f0f5fe',
+      color: role === 'admin' ? '#3a76ed' : '#3b79f6',
       padding: '2px 8px', borderRadius: 20, fontSize: 11, fontWeight: 600,
     }}>
       {role}
@@ -190,7 +190,7 @@ function RoleBadge({ role }) {
 function StatusDot({ active }) {
   return (
     <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: active ? '#16a34a' : '#dc2626' }}>
-      <span style={{ width: 7, height: 7, borderRadius: '50%', background: active ? '#22c55e' : '#ef4444', display: 'inline-block' }} />
+      <span style={{ width: 7, height: 7, borderRadius: '50%', background: active ? '#2258c5' : '#447def', display: 'inline-block' }} />
       {active ? 'Active' : 'Inactive'}
     </span>
   );
@@ -198,39 +198,39 @@ function StatusDot({ active }) {
 
 const styles = {
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 },
-  pageTitle: { margin: '0 0 4px', fontSize: 22, fontWeight: 700, color: '#0f172a' },
+  pageTitle: { margin: '0 0 4px', fontSize: 22, fontWeight: 700, color: '#0f182a' },
   pageSub: { margin: 0, color: '#64748b', fontSize: 13 },
   addBtn: {
-    background: '#3b82f6', color: '#fff', border: 'none',
+    background: '#3c7af5', color: '#fff', border: 'none',
     borderRadius: 8, padding: '9px 18px', fontSize: 14, fontWeight: 600, cursor: 'pointer',
   },
   filters: { display: 'flex', gap: 12, marginBottom: 16 },
   searchInput: {
-    flex: 1, padding: '9px 14px', border: '1px solid #e2e8f0',
+    flex: 1, padding: '9px 14px', border: '1px solid #e2e7f0',
     borderRadius: 8, fontSize: 14, outline: 'none',
   },
   select: {
-    padding: '9px 14px', border: '1px solid #e2e8f0',
-    borderRadius: 8, fontSize: 14, background: '#fff', cursor: 'pointer',
+    padding: '9px 14px', border: '1px solid #e2e7f0',
+    borderRadius: 8, fontSize: 14, background: '#f4f8ff', cursor: 'pointer',
   },
-  error: { background: '#fef2f2', color: '#dc2626', padding: '10px 14px', borderRadius: 8, marginBottom: 12 },
-  tableWrap: { background: '#fff', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.07)' },
+  error: { background: '#f1f5fe', color: '#dc2626', padding: '10px 14px', borderRadius: 8, marginBottom: 12 },
+  tableWrap: { background: '#f4f8ff', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.07)' },
   table: { width: '100%', borderCollapse: 'collapse' },
-  th: { padding: '12px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#64748b', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', textTransform: 'uppercase', letterSpacing: '0.5px' },
-  tr: { borderBottom: '1px solid #f1f5f9' },
-  td: { padding: '12px 16px', fontSize: 13, color: '#334155', verticalAlign: 'middle' },
-  empId: { background: '#f1f5f9', padding: '2px 6px', borderRadius: 4, fontSize: 12, fontFamily: 'monospace' },
-  empName: { margin: 0, fontWeight: 600, color: '#1e293b' },
+  th: { padding: '12px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#64748b', background: '#f4f6fa', borderBottom: '1px solid #e2e7f0', textTransform: 'uppercase', letterSpacing: '0.5px' },
+  tr: { borderBottom: '1px solid #f1f4f9' },
+  td: { padding: '12px 16px', fontSize: 13, color: '#333e55', verticalAlign: 'middle' },
+  empId: { background: '#f1f4f9', padding: '2px 6px', borderRadius: 4, fontSize: 12, fontFamily: 'monospace' },
+  empName: { margin: 0, fontWeight: 600, color: '#1e283b' },
   smallText: { color: '#64748b', fontSize: 12 },
-  empty: { textAlign: 'center', padding: 32, color: '#94a3b8', fontSize: 14 },
+  empty: { textAlign: 'center', padding: 32, color: '#94a0b8', fontSize: 14 },
   actions: { display: 'flex', gap: 6 },
-  editBtn: { background: '#eff6ff', color: '#3b82f6', border: 'none', borderRadius: 6, padding: '5px 10px', fontSize: 12, fontWeight: 600, cursor: 'pointer' },
-  deleteBtn: { background: '#fef2f2', color: '#dc2626', border: 'none', borderRadius: 6, padding: '5px 10px', fontSize: 12, fontWeight: 600, cursor: 'pointer' },
+  editBtn: { background: '#f0f5fe', color: '#3b79f6', border: 'none', borderRadius: 6, padding: '5px 10px', fontSize: 12, fontWeight: 600, cursor: 'pointer' },
+  deleteBtn: { background: '#f1f5fe', color: '#dc2626', border: 'none', borderRadius: 6, padding: '5px 10px', fontSize: 12, fontWeight: 600, cursor: 'pointer' },
   pagination: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, marginTop: 16 },
-  pageBtn: { background: '#fff', border: '1px solid #e2e8f0', borderRadius: 6, padding: '6px 14px', fontSize: 13, cursor: 'pointer' },
+  pageBtn: { background: '#f4f8ff', border: '1px solid #e2e7f0', borderRadius: 6, padding: '6px 14px', fontSize: 13, cursor: 'pointer' },
   pageInfo: { fontSize: 13, color: '#64748b' },
-  modalOverlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
-  modal: { background: '#fff', borderRadius: 12, padding: 28, maxWidth: 400, width: '90%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' },
-  cancelBtn: { background: '#f1f5f9', border: 'none', borderRadius: 8, padding: '9px 20px', fontSize: 14, cursor: 'pointer' },
-  confirmDeleteBtn: { background: '#dc2626', color: '#fff', border: 'none', borderRadius: 8, padding: '9px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer' },
+  modalOverlay: { position: 'fixed', inset: 0, background: 'rgba(0, 0, 0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
+  modal: { background: '#f4f8ff', borderRadius: 12, padding: 28, maxWidth: 400, width: '90%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' },
+  cancelBtn: { background: '#f1f4f9', border: 'none', borderRadius: 8, padding: '9px 20px', fontSize: 14, cursor: 'pointer' },
+  confirmDeleteBtn: { background: '#2663dc', color: '#fff', border: 'none', borderRadius: 8, padding: '9px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer' },
 };

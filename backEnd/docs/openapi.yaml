@@ -1,0 +1,151 @@
+openapi: 3.0.3
+info:
+  title: Smart Attendance Face Scan API
+  version: 1.0.0
+  description: >
+    Documents the existing live-kiosk descriptor contract. Face detection and
+    landmark-derived blink/head-turn signals are calculated in the browser;
+    the API accepts the descriptor and consumes a short-lived, one-use server
+    challenge. This is a best-effort liveness signal, not presentation-attack
+    detection.
+servers:
+  - url: http://localhost:5000/api
+tags:
+  - name: Attendance Scan
+paths:
+  /attendance/liveness/challenge:
+    post:
+      tags: [Attendance Scan]
+      summary: Issue a short-lived blink or head-turn challenge
+      responses:
+        '201':
+          description: One-use challenge issued.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      challengeId:
+                        type: string
+                      action:
+                        type: string
+                        enum: [blink, turn]
+                      expiresAt:
+                        type: string
+                        format: date-time
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          description: Unable to create the challenge.
+  /attendance/scan:
+    post:
+      tags: [Attendance Scan]
+      summary: Verify a live face descriptor and record check-in
+      description: >
+        Requires exactly 128 finite descriptor values. Uploading raw images is
+        not supported by this endpoint; face-api.js performs detection and
+        descriptor extraction in the browser. Distance must be strictly less
+        than 0.6. Successful records include the recognized account/profile,
+        match distance, attendance status, IP/device metadata, and a liveness
+        score of 1 after the server challenge is consumed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScanRequest'
+      responses:
+        '200':
+          description: Attendance already exists or the employee is recognized in an active session.
+        '201':
+          description: Attendance check-in recorded.
+        '400':
+          description: Invalid descriptor or check-in window.
+        '403':
+          description: Liveness challenge missing, expired, replayed, or invalid.
+        '404':
+          description: No registered faces exist or the face is unknown.
+        '409':
+          description: Duplicate scan within 30 seconds or duplicate daily record.
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          description: Attendance could not be processed.
+  /attendance/checkout:
+    post:
+      tags: [Attendance Scan]
+      summary: Verify a live face descriptor and record check-out
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScanRequest'
+      responses:
+        '200':
+          description: Check-out recorded.
+        '400':
+          description: Invalid descriptor or no check-in record exists.
+        '403':
+          description: Liveness challenge missing, expired, replayed, or invalid.
+        '404':
+          description: No registered faces exist or the face is unknown.
+        '409':
+          description: Duplicate scan within 30 seconds or attendance already completed.
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          description: Attendance could not be processed.
+components:
+  schemas:
+    ScanRequest:
+      type: object
+      required: [faceDescriptor, livenessProof]
+      properties:
+        faceDescriptor:
+          type: array
+          minItems: 128
+          maxItems: 128
+          items:
+            type: number
+            minimum: -2
+            maximum: 2
+        livenessProof:
+          type: object
+          required: [challengeId, action, durationMs, observedFrames]
+          properties:
+            challengeId:
+              type: string
+              format: mongo-object-id
+            action:
+              type: string
+              enum: [blink, turn]
+            durationMs:
+              type: integer
+              minimum: 1000
+              maximum: 30000
+            observedFrames:
+              type: integer
+              minimum: 3
+              maximum: 120
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+  responses:
+    RateLimited:
+      description: More than 10 scan requests were sent from this IP in one minute.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

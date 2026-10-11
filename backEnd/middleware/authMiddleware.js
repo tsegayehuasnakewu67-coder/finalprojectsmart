@@ -28,8 +28,23 @@ const protect = async (req, res, next) => {
 
     if (!user) return res.status(401).json({ success: false, message: 'User no longer exists.' });
     if (!user.isActive) return res.status(401).json({ success: false, message: 'Account deactivated.' });
+    if ((decoded.authVersion ?? 0) !== (user.authVersion ?? 0)) {
+      return res.status(401).json({ success: false, message: 'Session expired. Please sign in again.' });
+    }
+
+    const requestPath = `${req.baseUrl}${req.path}`;
+    const passwordChangeAllowed = requestPath === '/api/auth/me'
+      || requestPath === '/api/auth/change-password';
+    if ((decoded.passwordChangeOnly || user.mustChangePassword) && !passwordChangeAllowed) {
+      return res.status(403).json({
+        success: false,
+        code: 'PASSWORD_CHANGE_REQUIRED',
+        message: 'For your account security, please change your default password before continuing.',
+      });
+    }
 
     req.user = user;
+    req.tokenClaims = decoded;
     next();
   } catch (err) {
     const msg = err.name === 'TokenExpiredError' ? 'Session expired.' : 'Invalid token.';

@@ -82,8 +82,8 @@ function printAnalyticsPdf(data, filters) {
   const reportWindow = window.open('', '_blank', 'width=1100,height=800');
   if (!reportWindow) return;
   reportWindow.document.write(`<!doctype html><html><head><title>MAU Attendance Report</title>
-    <style>body{font-family:Arial,sans-serif;color:#172033;padding:32px}h1{margin:0 0 8px;color:#123c78}p{color:#526178}table{width:100%;border-collapse:collapse;margin-top:24px}th,td{border:1px solid #d8e0eb;padding:10px;text-align:left;font-size:12px}th{background:#123c78;color:#fff}tr:nth-child(even){background:#f4f7fb}.meta{display:flex;gap:28px;flex-wrap:wrap}</style>
-    </head><body><h1>Mekdela Abba University</h1><h2>Attendance Report</h2>
+    <style>body{font-family:Arial,sans-serif;color:#172033;padding:32px}h1{margin:0 0 8px;color:#123478}p{color:#526178}table{width:100%;border-collapse:collapse;margin-top:24px}th,td{border:1px solid #d8deeb;padding:10px;text-align:left;font-size:12px}th{background:#123478;color:#ffffff}tr:nth-child(even){background:#f4f6fb}.meta{display:flex;gap:28px;flex-wrap:wrap}</style>
+    </head><body><h1>Mekdela Amba University</h1><h2>Attendance Report</h2>
     <div class="meta"><p><strong>Period:</strong> ${formatEthiopianDate(data?.periodStart)} to ${formatEthiopianDate(data?.periodEnd)}</p>
     <p><strong>Department:</strong> ${filters.department || 'All departments'}</p><p><strong>Employees:</strong> ${data?.employees?.length || 0}</p></div>
     <table><thead><tr><th>Employee</th><th>ID</th><th>Department</th><th>Present</th><th>Late</th><th>Absent</th><th>Attendance</th><th>Late Time</th></tr></thead><tbody>${rows}</tbody></table>
@@ -114,13 +114,13 @@ const placeholderDept = (d) => {
 
 const S = {
   card: {
-    background: '#0f172a',
-    border: '1px solid #1e293b',
+    background: '#0f182a',
+    border: '1px solid #1e283b',
     borderRadius: '14px',
   },
   tableCard: {
-    background: '#0f172a',
-    border: '1px solid #1e293b',
+    background: '#0f182a',
+    border: '1px solid #1e283b',
     borderRadius: '14px',
     overflow: 'hidden',
     boxShadow: '0 4px 24px rgba(0,0,0,0.25)',
@@ -128,10 +128,10 @@ const S = {
   input: {
     width: '100%',
     padding: '9px 12px',
-    background: '#1e293b',
-    border: '1.5px solid #334155',
+    background: '#1c273d',
+    border: '1.5px solid #333e55',
     borderRadius: '9px',
-    color: '#e2e8f0',
+    color: '#e2e7f0',
     fontSize: '0.875rem',
     outline: 'none',
     boxSizing: 'border-box',
@@ -139,25 +139,25 @@ const S = {
     colorScheme: 'dark',
     textDecoration: 'none',
     backgroundImage: 'none',
-    WebkitBoxShadow: '0 0 0 1000px #1e293b inset',
-    WebkitTextFillColor: '#e2e8f0',
+    WebkitBoxShadow: '0 0 0 1000px #1e283b inset',
+    WebkitTextFillColor: '#e2e7f0',
   },
   textInput: {
     width: '100%',
     padding: '9px 12px',
-    background: '#1e293b',
-    border: '1.5px solid #334155',
+    background: '#1c273d',
+    border: '1.5px solid #333e55',
     borderStyle: 'solid',
     borderRadius: '9px',
-    color: '#e2e8f0',
+    color: '#e2e7f0',
     fontSize: '0.875rem',
     outline: 'none',
     boxSizing: 'border-box',
     transition: 'border-color 0.15s',
     textDecoration: 'none',
     backgroundImage: 'none',
-    caretColor: '#e2e8f0',
-    WebkitTextFillColor: '#e2e8f0',
+    caretColor: '#e2e7f0',
+    WebkitTextFillColor: '#e2e7f0',
   },
   label: {
     display: 'block',
@@ -177,23 +177,23 @@ const S = {
     textTransform: 'uppercase',
     letterSpacing: '0.08em',
     whiteSpace: 'nowrap',
-    background: 'rgba(30,41,59,0.9)',
-    borderBottom: '1px solid #1e293b',
+    background: 'rgba(28, 39, 61,0.9)',
+    borderBottom: '1px solid #1e283b',
   },
   td: (hovered, isLast) => ({
     padding: CELL_PAD,
     whiteSpace: 'nowrap',
     fontSize: '0.8125rem',
-    borderBottom: isLast ? 'none' : '1px solid rgba(30,41,59,0.7)',
-    background: hovered ? 'rgba(30,41,59,0.45)' : 'transparent',
+    borderBottom: isLast ? 'none' : '1px solid rgba(30, 40, 59,0.7)',
+    background: hovered ? 'rgba(28, 39, 61,0.45)' : 'transparent',
     transition: 'background 0.1s',
   }),
   btn: (primary) => ({
     padding: '9px 20px',
     borderRadius: '10px',
-    border: primary ? 'none' : '1px solid #334155',
-    background: primary ? '#2563eb' : '#1e293b',
-    color: primary ? '#fff' : '#94a3b8',
+    border: primary ? 'none' : '1px solid #333e55',
+    background: primary ? '#2567eb' : '#1c273d',
+    color: primary ? '#fff' : '#94a0b8',
     cursor: 'pointer',
     fontSize: '0.875rem',
     fontWeight: 600,
@@ -208,7 +208,7 @@ const S = {
     fontSize: '0.875rem',
     fontWeight: 600,
     transition: 'background 0.15s, color 0.15s',
-    background: active ? '#2563eb' : 'transparent',
+    background: active ? '#2567eb' : 'transparent',
     color:      active ? '#fff'    : '#64748b',
   }),
 };
@@ -225,7 +225,7 @@ export default function AttendanceReports() {
       {/* ── Heading + tab switcher ── */}
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f1f5f9', margin: '0 0 4px', letterSpacing: '-0.025em' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f1f4f9', margin: '0 0 4px', letterSpacing: '-0.025em' }}>
             Attendance Reports
           </h1>
           <p style={{ fontSize: '0.875rem', color: '#64748b', margin: 0 }}>
@@ -233,7 +233,7 @@ export default function AttendanceReports() {
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '4px', background: '#0f172a', border: '1px solid #1e293b', borderRadius: '12px', padding: '4px' }}>
+        <div style={{ display: 'flex', gap: '4px', background: '#0f182a', border: '1px solid #1e283b', borderRadius: '12px', padding: '4px' }}>
           <button style={S.tab(tab === 'log')}       onClick={() => setTab('log')}>
             <List size={14} /> Daily Log
           </button>
@@ -315,8 +315,8 @@ function DailyLogTab() {
           <div>
             <label style={S.label}>Status</label>
             <select name="status" value={filters.status} onChange={setF} style={S.input}
-              onFocus={e => { e.target.style.borderColor = '#3b82f6'; }}
-              onBlur={e  => { e.target.style.borderColor = '#334155'; }}>
+              onFocus={e => { e.target.style.borderColor = '#3b79f6'; }}
+              onBlur={e  => { e.target.style.borderColor = '#333e55'; }}>
               <option value="">All</option>
               <option value="Present">Present</option>
               <option value="Late">Late</option>
@@ -326,7 +326,7 @@ function DailyLogTab() {
           <FilterField label="Search" name="search" type="text" value={filters.search} onChange={setF} />
         </div>
 
-        <div style={{ display: 'flex', gap: '10px', paddingTop: '14px', borderTop: '1px solid #1e293b' }}>
+        <div style={{ display: 'flex', gap: '10px', paddingTop: '14px', borderTop: '1px solid #1e283b' }}>
           <Btn primary onClick={() => fetchData(1)}>Apply Filters</Btn>
           <Btn onClick={clearF}>Clear</Btn>
         </div>
@@ -354,7 +354,7 @@ function DailyLogTab() {
               minWidth: LOG_TABLE_MIN_WIDTH,
               borderCollapse: 'collapse',
               fontSize: '0.875rem',
-              background: '#0f172a',
+              background: '#0f182a',
               tableLayout: 'fixed',
             }}>
               <colgroup>
@@ -415,7 +415,7 @@ function LogRow({ r, isLast }) {
       <span style={{
         display: 'inline-flex', alignItems: 'center', gap: '4px',
         padding: '2px 9px', borderRadius: '999px',
-        background: 'rgba(180,83,9,0.2)', color: '#fbbf24',
+        background: 'rgba(9, 66, 180,0.2)', color: '#fbbf24',
         fontSize: '0.75rem', fontWeight: 700,
       }}>
         +{label} late
@@ -426,16 +426,16 @@ function LogRow({ r, isLast }) {
   return (
     <tr onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
       <td style={td()}>
-        <code style={{ fontSize: '0.75rem', background: '#1e293b', border: '1px solid #334155', padding: '2px 7px', borderRadius: '5px', color: '#94a3b8', fontFamily: 'monospace' }}>
+        <code style={{ fontSize: '0.75rem', background: '#1c273d', border: '1px solid #333e55', padding: '2px 7px', borderRadius: '5px', color: '#94a0b8', fontFamily: 'monospace' }}>
           {r.employeeId}
         </code>
       </td>
-      <td style={td({ fontWeight: 600, color: '#f1f5f9' })}>{r.fullName}</td>
-      <td style={td({ color: '#cbd5e1' })}>{placeholderDept(r.department)}</td>
-      <td style={td({ color: '#94a3b8', fontFamily: 'monospace' })}>{formatEthiopianDate(r.date)}</td>
+      <td style={td({ fontWeight: 600, color: '#f1f4f9' })}>{r.fullName}</td>
+      <td style={td({ color: '#cbd2e1' })}>{placeholderDept(r.department)}</td>
+      <td style={td({ color: '#94a0b8', fontFamily: 'monospace' })}>{formatEthiopianDate(r.date)}</td>
 
       {/* Check-In — exact time */}
-      <td style={td({ fontFamily: 'monospace', color: '#cbd5e1' })}>
+      <td style={td({ fontFamily: 'monospace', color: '#cbd2e1' })}>
         {fmt(r.checkInTime) ?? <Dash />}
       </td>
 
@@ -449,12 +449,12 @@ function LogRow({ r, isLast }) {
 
       {/* After-Lunch In */}
       <td style={td({ fontFamily: 'monospace' })}>
-        {fmt(r.afterLunchCheckIn) ? <span style={{ color: '#60a5fa' }}>{fmt(r.afterLunchCheckIn)}</span> : <Dash />}
+        {fmt(r.afterLunchCheckIn) ? <span style={{ color: '#6093fa' }}>{fmt(r.afterLunchCheckIn)}</span> : <Dash />}
       </td>
 
       {/* Check-Out */}
       <td style={td({ fontFamily: 'monospace' })}>
-        {fmt(r.afterLunchCheckOut) ? <span style={{ color: '#c084fc' }}>{fmt(r.afterLunchCheckOut)}</span> : <Dash />}
+        {fmt(r.afterLunchCheckOut) ? <span style={{ color: '#84acfc' }}>{fmt(r.afterLunchCheckOut)}</span> : <Dash />}
       </td>
 
       <td style={td()}><StatusBadge status={r.status} /></td>
@@ -557,9 +557,9 @@ function AnalyticsTab() {
                   onClick={() => applyPeriod(r.key)}
                   style={{
                     padding: '5px 12px', borderRadius: '7px',
-                    border: active ? '1px solid #2563eb' : '1px solid #334155',
-                    background: active ? '#2563eb' : '#1e293b',
-                    color: active ? '#fff' : '#94a3b8',
+                    border: active ? '1px solid #2567eb' : '1px solid #333e55',
+                    background: active ? '#2567eb' : '#1c273d',
+                    color: active ? '#fff' : '#94a0b8',
                     cursor: 'pointer',
                     fontSize: '0.75rem', fontWeight: 600, transition: 'background 0.15s',
                   }}
@@ -578,7 +578,7 @@ function AnalyticsTab() {
           <FilterField label="Search"     name="search"     type="text" value={filters.search}     onChange={setF} />
         </div>
 
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', paddingTop: '14px', borderTop: '1px solid #1e293b' }}>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', paddingTop: '14px', borderTop: '1px solid #1e283b' }}>
           <Btn primary onClick={fetchAnalytics}>Generate Report</Btn>
           <Btn onClick={() => data && downloadAnalyticsCsv(data, filters)} disabled={!data}>
             <Download size={14} /> Download Excel
@@ -608,14 +608,14 @@ function AnalyticsTab() {
             <KpiTile label="Accumulated Lateness"  value={counts.lateLabel} color="#fbbf24" />
             <KpiTile label="⚠ Warning"             value={counts.warning}   color="#fbbf24" icon={<AlertTriangle size={16} color="#fbbf24" />} />
             <KpiTile label="Termination Risk"      value={counts.risk}      color="#f87171" icon={<ShieldAlert size={16} color="#f87171" />} />
-            <KpiTile label="Working Days"          value={data.totalWorkingDays} color="#94a3b8" />
+            <KpiTile label="Working Days"          value={data.totalWorkingDays} color="#94a0b8" />
           </div>
 
           {/* Period label */}
           <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: '-8px 0 0' }}>
-            Period: <strong style={{ color: '#94a3b8' }}>{formatEthiopianDate(data.periodStart)}</strong>
+            Period: <strong style={{ color: '#94a0b8' }}>{formatEthiopianDate(data.periodStart)}</strong>
             {' → '}
-            <strong style={{ color: '#94a3b8' }}>{formatEthiopianDate(data.periodEnd)}</strong>
+            <strong style={{ color: '#94a0b8' }}>{formatEthiopianDate(data.periodEnd)}</strong>
             {' · '}
             {data.employees.length} employees
           </p>
@@ -629,7 +629,7 @@ function AnalyticsTab() {
                 minWidth: ANALYTICS_TABLE_MIN_WIDTH,
                 borderCollapse: 'collapse',
                 fontSize: '0.875rem',
-                background: '#0f172a',
+                background: '#0f182a',
                 tableLayout: 'fixed',
               }}>
                 <colgroup>
@@ -699,13 +699,13 @@ function AnalyticsRow({ emp, isLast }) {
     <tr onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
       {/* Employee */}
       <td style={td()}>
-        <div style={{ fontWeight: 600, color: '#f1f5f9' }}>{emp.fullName}</div>
+        <div style={{ fontWeight: 600, color: '#f1f4f9' }}>{emp.fullName}</div>
         <div style={{ fontSize: '0.6875rem', color: '#64748b', fontFamily: 'monospace', marginTop: '2px' }}>
           {emp.employeeId}
         </div>
       </td>
 
-      <td style={td({ color: '#cbd5e1' })}>{placeholderDept(emp.department)}</td>
+      <td style={td({ color: '#cbd2e1' })}>{placeholderDept(emp.department)}</td>
 
       {/* Present */}
       <td style={td({ textAlign: 'center' })}>
@@ -729,7 +729,7 @@ function AnalyticsRow({ emp, isLast }) {
       {/* Attendance % — mini progress bar */}
       <td style={td()}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{ width: '52px', height: '5px', background: '#1e293b', borderRadius: '999px', overflow: 'hidden', flexShrink: 0 }}>
+          <div style={{ width: '52px', height: '5px', background: '#1c273d', borderRadius: '999px', overflow: 'hidden', flexShrink: 0 }}>
             <div style={{ width: `${emp.attendancePct}%`, height: '100%', background: pctColor, borderRadius: '999px' }} />
           </div>
           <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: pctColor }}>
@@ -742,7 +742,7 @@ function AnalyticsRow({ emp, isLast }) {
       <td style={td({ textAlign: 'center' })}>
         {emp.lateOccurrences > 0
           ? <span style={{ fontWeight: 700, color: '#fbbf24' }}>{emp.lateOccurrences}×</span>
-          : <span style={{ color: '#334155' }}>—</span>}
+          : <span style={{ color: '#333e55' }}>—</span>}
       </td>
 
       {/* Total late time */}
@@ -751,13 +751,13 @@ function AnalyticsRow({ emp, isLast }) {
           ? (
             <span style={{
               display: 'inline-block', padding: '2px 9px', borderRadius: '999px',
-              background: 'rgba(180,83,9,0.2)', color: '#fbbf24',
+              background: 'rgba(9, 66, 180,0.2)', color: '#fbbf24',
               fontSize: '0.75rem', fontWeight: 700,
             }}>
               {emp.lateTotalLabel}
             </span>
           )
-          : <span style={{ color: '#334155' }}>—</span>}
+          : <span style={{ color: '#333e55' }}>—</span>}
       </td>
 
       {/* Health flag badge */}
@@ -774,9 +774,9 @@ function AnalyticsRow({ emp, isLast }) {
 
 function HealthBadge({ flag }) {
   const map = {
-    normal:           { bg: 'rgba(21,128,61,0.2)',  color: '#4ade80', border: 'rgba(21,128,61,0.4)',  icon: <CheckCircle2 size={12} />, label: 'Normal'            },
-    warning:          { bg: 'rgba(180,83,9,0.25)',  color: '#fbbf24', border: 'rgba(180,83,9,0.45)',  icon: <AlertTriangle size={12} />, label: 'Warning Issued'   },
-    termination_risk: { bg: 'rgba(185,28,28,0.25)', color: '#f87171', border: 'rgba(185,28,28,0.45)', icon: <ShieldAlert size={12} />,   label: 'Termination Risk' },
+    normal:           { bg: 'rgba(21, 57, 128,0.2)',  color: '#4ade80', border: 'rgba(21,128,61,0.4)',  icon: <CheckCircle2 size={12} />, label: 'Normal'            },
+    warning:          { bg: 'rgba(9, 66, 180,0.25)',  color: '#fbbf24', border: 'rgba(180,83,9,0.45)',  icon: <AlertTriangle size={12} />, label: 'Warning Issued'   },
+    termination_risk: { bg: 'rgba(28, 80, 185,0.25)', color: '#f87171', border: 'rgba(185,28,28,0.45)', icon: <ShieldAlert size={12} />,   label: 'Termination Risk' },
   };
   const s = map[flag] ?? map.normal;
   return (
@@ -793,11 +793,11 @@ function HealthBadge({ flag }) {
 
 function StatusBadge({ status }) {
   const map = {
-    Present: { bg: 'rgba(21,128,61,0.2)',  color: '#86efac', border: 'rgba(21,128,61,0.35)'  },
-    Late:    { bg: 'rgba(180,83,9,0.2)',   color: '#fcd34d', border: 'rgba(180,83,9,0.35)'   },
-    Absent:  { bg: 'rgba(185,28,28,0.2)',  color: '#fca5a5', border: 'rgba(185,28,28,0.35)'  },
+    Present: { bg: 'rgba(21, 57, 128,0.2)',  color: '#86efac', border: 'rgba(21,128,61,0.35)'  },
+    Late:    { bg: 'rgba(9, 66, 180,0.2)',   color: '#fcd34d', border: 'rgba(180,83,9,0.35)'   },
+    Absent:  { bg: 'rgba(28, 80, 185,0.2)',  color: '#fca5a5', border: 'rgba(185,28,28,0.35)'  },
   };
-  const s = map[status] ?? { bg: 'rgba(30,41,59,0.5)', color: '#94a3b8', border: '#334155' };
+  const s = map[status] ?? { bg: 'rgba(28, 39, 61,0.5)', color: '#94a0b8', border: '#333e55' };
   return (
     <span style={{
       display: 'inline-block', fontSize: '0.6875rem', fontWeight: 700,
@@ -815,7 +815,7 @@ function ConfBar({ value }) {
   const color = pct >= 70 ? '#22c55e' : pct >= 40 ? '#f59e0b' : '#ef4444';
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-      <div style={{ width: '48px', height: '5px', background: '#1e293b', borderRadius: '999px', overflow: 'hidden' }}>
+      <div style={{ width: '48px', height: '5px', background: '#1c273d', borderRadius: '999px', overflow: 'hidden' }}>
         <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: '999px' }} />
       </div>
       <span style={{ fontSize: '0.6875rem', color: '#64748b', fontFamily: 'monospace' }}>{value.toFixed(3)}</span>
@@ -865,8 +865,8 @@ function FilterField({ label, name, value, onChange, type }) {
         autoComplete="off"
         spellCheck={false}
         style={isText ? S.textInput : S.input}
-        onFocus={e => { e.target.style.borderColor = '#3b82f6'; }}
-        onBlur={e  => { e.target.style.borderColor = '#334155'; }}
+        onFocus={e => { e.target.style.borderColor = '#3b79f6'; }}
+        onBlur={e  => { e.target.style.borderColor = '#333e55'; }}
       />
     </div>
   );
@@ -885,8 +885,8 @@ function Btn({ primary, onClick, children, disabled = false }) {
         opacity: disabled ? 0.45 : 1,
         cursor: disabled ? 'not-allowed' : 'pointer',
         background: primary
-          ? (hov ? '#3b82f6' : '#2563eb')
-          : (hov ? '#334155' : '#1e293b'),
+          ? (hov ? '#3b79f6' : '#2567eb')
+          : (hov ? '#333e55' : '#1e283b'),
       }}
     >
       {children}
@@ -898,7 +898,7 @@ function PaginationBar({ page, totalPages, total, label, onPrev, onNext }) {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '11px 20px', borderTop: '1px solid #1e293b', background: '#0f172a',
+      padding: '11px 20px', borderTop: '1px solid #1e283b', background: '#0f182a',
     }}>
       <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
         Page {page} of {totalPages} &nbsp;·&nbsp; {total} {label}
@@ -916,25 +916,25 @@ function PaginationBtn({ disabled, onClick, children }) {
     <button disabled={disabled} onClick={onClick}
       style={{
         padding: '6px 8px', borderRadius: '8px',
-        background: '#1e293b', border: '1px solid #334155',
-        color: '#94a3b8', cursor: disabled ? 'not-allowed' : 'pointer',
+        background: '#1c273d', border: '1px solid #333e55',
+        color: '#94a0b8', cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 0.3 : 1, display: 'flex', alignItems: 'center',
         transition: 'background 0.12s',
       }}
-      onMouseEnter={e => { if (!disabled) e.currentTarget.style.background = '#334155'; }}
-      onMouseLeave={e => { e.currentTarget.style.background = '#1e293b'; }}>
+      onMouseEnter={e => { if (!disabled) e.currentTarget.style.background = '#333e55'; }}
+      onMouseLeave={e => { e.currentTarget.style.background = '#1e283b'; }}>
       {children}
     </button>
   );
 }
 
 function Dash() {
-  return <span style={{ color: '#334155' }}>—</span>;
+  return <span style={{ color: '#333e55' }}>—</span>;
 }
 
 function ErrBox({ msg }) {
   return (
-    <div style={{ padding: '12px 16px', borderRadius: '10px', background: 'rgba(127,29,29,0.3)', border: '1px solid #991b1b', color: '#fca5a5', fontSize: '0.875rem' }}>
+    <div style={{ padding: '12px 16px', borderRadius: '10px', background: 'rgba(29, 62, 127,0.3)', border: '1px solid #991b1b', color: '#fca5a5', fontSize: '0.875rem' }}>
       {msg}
     </div>
   );

@@ -276,7 +276,7 @@ function Field({ label, name, value, onChange, type = 'text', required, disabled
         onChange={onChange}
         required={required}
         disabled={disabled}
-        style={{ ...styles.input, background: disabled ? '#f8fafc' : '#fff', cursor: disabled ? 'not-allowed' : 'text' }}
+        style={{ ...styles.input, background: disabled ? '#f4f6fa' : '#f4f8ff', cursor: disabled ? 'not-allowed' : 'text' }}
       />
     </div>
   );
@@ -285,30 +285,30 @@ function Field({ label, name, value, onChange, type = 'text', required, disabled
 const styles = {
   page: {},
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 },
-  pageTitle: { margin: '0 0 4px', fontSize: 22, fontWeight: 700, color: '#0f172a' },
+  pageTitle: { margin: '0 0 4px', fontSize: 22, fontWeight: 700, color: '#0f182a' },
   pageSub: { margin: 0, color: '#64748b', fontSize: 13 },
-  backBtn: { background: '#f1f5f9', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, cursor: 'pointer', color: '#475569', fontWeight: 600 },
-  formCard: { background: '#fff', borderRadius: 12, padding: 28, boxShadow: '0 1px 3px rgba(0,0,0,0.07)' },
+  backBtn: { background: '#f1f4f9', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, cursor: 'pointer', color: '#475569', fontWeight: 600 },
+  formCard: { background: '#f4f8ff', borderRadius: 12, padding: 28, boxShadow: '0 1px 3px rgba(0,0,0,0.07)' },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px 20px', marginBottom: 24 },
   fieldWrap: { display: 'flex', flexDirection: 'column', gap: 6 },
   label: { fontSize: 13, fontWeight: 600, color: '#374151' },
   input: { padding: '9px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 14, outline: 'none' },
-  select: { padding: '9px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 14, background: '#fff' },
+  select: { padding: '9px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 14, background: '#f4f8ff' },
   textarea: { padding: '9px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 14, outline: 'none', resize: 'vertical', fontFamily: 'inherit' },
-  faceSection: { borderTop: '1px solid #f1f5f9', paddingTop: 20, marginBottom: 20 },
+  faceSection: { borderTop: '1px solid #f1f4f9', paddingTop: 20, marginBottom: 20 },
   sectionTitle: { margin: '0 0 12px', fontSize: 14, fontWeight: 700, color: '#374151' },
   faceRow: { display: 'flex', alignItems: 'center', gap: 16 },
   faceStatus: { flex: 1 },
   faceDone: { color: '#16a34a', fontSize: 13, fontWeight: 600 },
-  faceNone: { color: '#94a3b8', fontSize: 13 },
-  cameraBtn: { background: '#0f172a', color: '#fff', border: 'none', borderRadius: 8, padding: '9px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer' },
-  error: { background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', borderRadius: 8, padding: '10px 14px', fontSize: 13, marginBottom: 16 },
-  successMsg: { background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', borderRadius: 8, padding: '10px 14px', fontSize: 13, marginBottom: 16 },
+  faceNone: { color: '#94a0b8', fontSize: 13 },
+  cameraBtn: { background: '#0f182a', color: '#fff', border: 'none', borderRadius: 8, padding: '9px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer' },
+  error: { background: '#f1f5fe', color: '#dc2626', border: '1px solid #fecaca', borderRadius: 8, padding: '10px 14px', fontSize: 13, marginBottom: 16 },
+  successMsg: { background: '#f0f4fd', color: '#16a34a', border: '1px solid #bbf7d0', borderRadius: 8, padding: '10px 14px', fontSize: 13, marginBottom: 16 },
   submitRow: { display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 8 },
-  cancelBtn: { background: '#f1f5f9', border: 'none', borderRadius: 8, padding: '9px 20px', fontSize: 14, cursor: 'pointer', color: '#475569' },
-  submitBtn: { background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 8, padding: '9px 22px', fontSize: 14, fontWeight: 600, cursor: 'pointer' },
-  modalOverlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
-  modal: { background: '#fff', borderRadius: 12, padding: 24, maxWidth: 500, width: '95%', textAlign: 'center' },
-  video: { width: 360, height: 270, borderRadius: 8, background: '#000', display: 'block' },
+  cancelBtn: { background: '#f1f4f9', border: 'none', borderRadius: 8, padding: '9px 20px', fontSize: 14, cursor: 'pointer', color: '#475569' },
+  submitBtn: { background: '#3c7af5', color: '#fff', border: 'none', borderRadius: 8, padding: '9px 22px', fontSize: 14, fontWeight: 600, cursor: 'pointer' },
+  modalOverlay: { position: 'fixed', inset: 0, background: 'rgba(0, 0, 0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
+  modal: { background: '#f4f8ff', borderRadius: 12, padding: 24, maxWidth: 500, width: '95%', textAlign: 'center' },
+  video: { width: 360, height: 270, borderRadius: 8, background: '#000000', display: 'block' },
   canvas: { position: 'absolute', top: 0, left: 0, width: 360, height: 270 },
 };

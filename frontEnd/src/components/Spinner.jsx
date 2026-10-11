@@ -1,16 +1,13 @@
 export default function Spinner({ fullScreen = false, size = 32 }) {
   const ring = (
     <div
-      className="spin rounded-full border-4 border-slate-700 border-t-blue-500"
+      aria-hidden="true"
+      className="app-spinner"
       style={{ width: size, height: size }}
     />
   );
   if (fullScreen) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center bg-[#020617] z-50">
-        {ring}
-      </div>
-    );
+    return <div className="app-loading-screen" role="status" aria-label="Loading">{ring}</div>;
   }
-  return <div className="flex items-center justify-center p-6">{ring}</div>;
+  return <div className="app-loading-inline" role="status" aria-label="Loading">{ring}</div>;
 }

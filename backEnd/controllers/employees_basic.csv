@@ -1,0 +1,6 @@
+employeeId,firstName,lastName,email,department,position
+EMP001,Meregwu,Abebe,meregwu.abebe@smartattend.com,Engineering,Software Developer
+EMP002,Sara,Tesfaye,sara.t@smartattend.com,Human Resources,HR Specialist
+EMP003,John,Doe,john.doe@smartattend.com,Finance,Accountant
+EMP004,Hanna,Girma,hanna.g@smartattend.com,Marketing,Content Creator
+EMP005,David,Smith,david.smith@smartattend.com,Engineering,QA Tester

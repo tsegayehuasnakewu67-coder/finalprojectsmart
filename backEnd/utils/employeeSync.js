@@ -22,7 +22,16 @@ const syncEmployeeForUser = async (user, { preserveFace = false } = {}) => {
     status: user.isActive ? 'Active' : 'Inactive',
     user: user._id,
   };
-  if (!preserveFace) fields.faceEncoding = user.faceDescriptor || [];
+  const existingEmployee = await Employee.findOne({ employeeId: user.employeeId }).select('+faceEncoding');
+  if (!user.faceDescriptor?.length && existingEmployee?.faceEncoding?.length === 128) {
+    user.faceDescriptor = existingEmployee.faceEncoding;
+    await user.updateOne({ $set: { faceDescriptor: existingEmployee.faceEncoding } });
+  }
+  if (!preserveFace || existingEmployee?.faceEncoding?.length === 128 || user.faceDescriptor?.length === 128) {
+    fields.faceEncoding = user.faceDescriptor?.length === 128
+      ? user.faceDescriptor
+      : existingEmployee?.faceEncoding || [];
+  }
 
   const employee = await Employee.findOneAndUpdate(
     { employeeId: user.employeeId },

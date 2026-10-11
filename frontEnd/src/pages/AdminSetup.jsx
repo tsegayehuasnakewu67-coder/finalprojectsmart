@@ -29,8 +29,8 @@ export default function AdminSetup() {
     if (form.password !== form.confirmPassword) {
       setError('Passwords do not match.'); return;
     }
-    if (form.password.length < 6) {
-      setError('Password must be at least 6 characters.'); return;
+    if (form.password.length < 12 || !/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])/.test(form.password)) {
+      setError('Password must be at least 12 characters and include uppercase, lowercase, a number, and a symbol.'); return;
     }
 
     setLoading(true);
@@ -51,7 +51,7 @@ export default function AdminSetup() {
   };
 
   return (
-    <div className="min-h-screen bg-[#020617] flex items-center justify-center p-4">
+    <div className="legacy-page min-h-screen bg-[#020917] flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
 
         {/* Brand */}

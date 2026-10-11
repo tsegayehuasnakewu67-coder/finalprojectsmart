@@ -9,6 +9,9 @@ export default defineConfig({
   ],
   server: {
     port: 5173,
+    watch: {
+      ignored: ['**/public/login-backgrounds/**'],
+    },
     proxy: {
       '/api': {
         target: process.env.VITE_BACKEND_URL || 'http://localhost:5000',

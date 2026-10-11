@@ -25,6 +25,16 @@ const communityPhotos = [
   '/photo_2026-09-29_11-46-50.jpg',
 ];
 
+const backgroundImages = [
+  'mau7.jfif',
+  'mau1.jfif',
+  'mau2.jfif',
+  'mau3.jfif',
+  'mau4.jfif',
+  'mau5.jfif',
+  'mau6.jfif',
+];
+
 export default function HomePage({ page = 'home' }) {
   const [projectPhotoIndex, setProjectPhotoIndex] = useState(0);
 
@@ -44,13 +54,43 @@ export default function HomePage({ page = 'home' }) {
     .home-shell {
       min-height: 100vh;
       background:
-        radial-gradient(circle at top left, rgba(96, 165, 250, 0.24), transparent 28%),
-        radial-gradient(circle at bottom right, rgba(129, 140, 248, 0.2), transparent 30%),
-        linear-gradient(135deg, #020817 0%, #0f172a 46%, #111827 100%);
-      color: #e2e8f0;
+        radial-gradient(circle at top, rgba(110, 231, 183, 0.35), transparent 30%),
+        linear-gradient(135deg, #020d0b 0%, #071d1a 24%, #0a312d 46%, #061912 100%);
+      color: #e2e7f0;
       overflow: hidden;
       position: relative;
       isolation: isolate;
+    }
+
+    .home-background {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+      background: transparent;
+    }
+
+    .home-background::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, rgba(4, 16, 13, 0.56), rgba(5, 35, 29, 0.22) 55%, rgba(7, 24, 20, 0.62)),
+        radial-gradient(circle at 50% 45%, rgba(74, 222, 128, 0.18), rgba(2, 17, 13, 0.18));
+    }
+
+    .home-background-image {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      opacity: 0;
+      transform: scale(1.06);
+      filter: brightness(1.18) saturate(1.08);
+      animation: homeBackgroundCycle 42s ease-in-out infinite;
     }
 
     html {
@@ -72,13 +112,13 @@ export default function HomePage({ page = 'home' }) {
     }
 
     .home-shell::before {
-      background: rgba(59, 130, 246, 0.42);
+      background: radial-gradient(circle, rgba(110, 231, 183, 1) 0%, rgba(52, 211, 153, 0.82) 38%, transparent 72%);
       top: -120px;
       right: -80px;
     }
 
     .home-shell::after {
-      background: rgba(168, 85, 247, 0.28);
+      background: radial-gradient(circle, rgba(134, 239, 172, 0.95) 0%, rgba(16, 185, 129, 0.8) 42%, transparent 70%);
       bottom: -150px;
       left: -120px;
     }
@@ -97,11 +137,11 @@ export default function HomePage({ page = 'home' }) {
       justify-content: space-between;
       gap: 16px;
       padding: 18px 24px;
-      border: 1px solid rgba(148, 163, 184, 0.18);
-      background: rgba(2, 8, 23, 0.52);
+      border: 1px solid rgba(110, 231, 183, 0.18);
+      background: rgba(4, 24, 19, 0.6);
       backdrop-filter: blur(12px);
       border-radius: 0;
-      box-shadow: 0 25px 50px rgba(2, 6, 23, 0.25);
+      box-shadow: 0 25px 50px rgba(2, 9, 23, 0.25);
       animation: revealDown 0.7s ease both;
     }
 
@@ -115,15 +155,15 @@ export default function HomePage({ page = 'home' }) {
       width: 52px;
       height: 52px;
       border-radius: 16px;
-      background: linear-gradient(135deg, #60a5fa 0%, #6366f1 55%, #8b5cf6 100%);
+      background: linear-gradient(135deg, #0b2d27 0%, #0f766e 55%, #34d399 100%);
       display: grid;
       place-items: center;
-      box-shadow: 0 12px 24px rgba(99, 102, 241, 0.45);
+      box-shadow: 0 12px 24px rgba(16, 185, 129, 0.38);
       animation: glow 3s ease-in-out infinite alternate, brandFloat 5s ease-in-out infinite;
       position: relative;
       overflow: hidden;
       padding: 4px;
-      background: #ffffff;
+      background: #f4f8ff;
     }
 
     .brand-logo-image {
@@ -139,7 +179,7 @@ export default function HomePage({ page = 'home' }) {
       content: '';
       position: absolute;
       inset: -45%;
-      background: linear-gradient(120deg, transparent 35%, rgba(255,255,255,0.5), transparent 65%);
+      background: linear-gradient(120deg, transparent 35%, rgba(255, 255, 255, 0.5), transparent 65%);
       transform: translateX(-70%) rotate(18deg);
       animation: logoShine 4.5s ease-in-out infinite;
     }
@@ -156,11 +196,12 @@ export default function HomePage({ page = 'home' }) {
       font-size: 1.04rem;
       font-weight: 750;
       letter-spacing: -0.03em;
+      color: #e0f2fe;
     }
 
     .brand-copy small {
       display: block;
-      color: #94a3b8;
+      color: #a5f3fc;
       margin-top: 2px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -170,12 +211,12 @@ export default function HomePage({ page = 'home' }) {
       display: flex;
       align-items: center;
       gap: 22px;
-      color: #cbd5e1;
+      color: #dbeafe;
       font-size: 0.95rem;
     }
 
     .nav-links a {
-      color: #cbd5e1;
+      color: #dbeafe;
       text-decoration: none;
       transition: color 0.2s ease, transform 0.2s ease;
       position: relative;
@@ -183,12 +224,12 @@ export default function HomePage({ page = 'home' }) {
     }
 
     .nav-links a:hover {
-      color: #facc15;
+      color: #7dd3fc;
       transform: translateY(-1px);
     }
 
     .nav-links a.active {
-      color: #facc15;
+      color: #7dd3fc;
     }
 
     .nav-links a::after {
@@ -198,7 +239,7 @@ export default function HomePage({ page = 'home' }) {
       right: 100%;
       bottom: 0;
       height: 2px;
-      background: #facc15;
+      background: #1c64f3;
       transition: right 0.25s ease;
     }
 
@@ -231,16 +272,16 @@ export default function HomePage({ page = 'home' }) {
     }
 
     .ghost-btn {
-      border: 1px solid rgba(148, 163, 184, 0.28);
-      background: rgba(15, 23, 42, 0.45);
-      color: #e2e8f0;
+      border: 1px solid rgba(148, 160, 184, 0.28);
+      background: rgba(15, 24, 42, 0.45);
+      color: #e2e7f0;
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
     }
 
     .primary-btn {
-      background: linear-gradient(135deg, #3b82f6 0%, #4f46e5 100%);
-      color: white;
-      box-shadow: 0 18px 30px rgba(59, 130, 246, 0.35);
+      background: linear-gradient(135deg, #5eead4 0%, #34d399 42%, #10b981 100%);
+      color: #04150f;
+      box-shadow: 0 18px 30px rgba(16, 185, 129, 0.35);
       position: relative;
       overflow: hidden;
     }
@@ -249,7 +290,7 @@ export default function HomePage({ page = 'home' }) {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(110deg, transparent 25%, rgba(255,255,255,0.22), transparent 65%);
+      background: linear-gradient(110deg, transparent 25%, rgba(255, 255, 255, 0.22), transparent 65%);
       transform: translateX(-120%);
       transition: transform 0.55s ease;
     }
@@ -264,8 +305,8 @@ export default function HomePage({ page = 'home' }) {
     }
 
     .ghost-btn:hover {
-      border-color: rgba(250, 204, 21, 0.62);
-      box-shadow: 0 12px 24px rgba(2, 6, 23, 0.25);
+      border-color: rgba(59, 130, 246, 0.62);
+      box-shadow: 0 12px 24px rgba(2, 9, 23, 0.25);
     }
 
     .hero {
@@ -288,14 +329,14 @@ export default function HomePage({ page = 'home' }) {
       gap: 8px;
       padding: 8px 14px;
       border-radius: 999px;
-      color: #bfdbfe;
-      background: rgba(59, 130, 246, 0.12);
-      border: 1px solid rgba(96, 165, 250, 0.28);
+      color: #d1fae5;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(110, 231, 183, 0.26);
       font-size: 0.75rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      box-shadow: 0 0 0 5px rgba(59, 130, 246, 0.05);
+      box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.04);
     }
 
     .hero h1 {
@@ -303,20 +344,20 @@ export default function HomePage({ page = 'home' }) {
       font-size: clamp(2.8rem, 5vw, 5rem);
       line-height: 0.96;
       letter-spacing: -0.06em;
-      color: #f8fafc;
+      color: #e0f2fe;
       text-wrap: balance;
     }
 
     .hero h1 .highlight {
       display: block;
-      background: linear-gradient(135deg, #7dd3fc 0%, #a78bfa 38%, #f9a8d4 100%);
+      background: linear-gradient(135deg, #7dd3fc 0%, #93c5fd 38%, #bfdbfe 100%);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
     }
 
     .hero-copy {
-      color: #cbd5e1;
+      color: #dbeafe;
       font-size: 1.08rem;
       line-height: 1.8;
       max-width: 680px;
@@ -338,8 +379,8 @@ export default function HomePage({ page = 'home' }) {
     }
 
     .stat-box {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(148, 163, 184, 0.14);
+      background: rgba(15, 24, 42, 0.6);
+      border: 1px solid rgba(148, 160, 184, 0.14);
       border-radius: 18px;
       padding: 18px 16px;
       backdrop-filter: blur(9px);
@@ -348,19 +389,19 @@ export default function HomePage({ page = 'home' }) {
 
     .stat-box:hover {
       transform: translateY(-5px);
-      border-color: rgba(250, 204, 21, 0.42);
-      background: rgba(30, 41, 59, 0.72);
+      border-color: rgba(59, 130, 246, 0.42);
+      background: rgba(28, 39, 61, 0.72);
     }
 
     .stat-box strong {
       display: block;
       font-size: 1.6rem;
-      color: #f8fafc;
+      color: #e0f2fe;
       margin-bottom: 4px;
     }
 
     .stat-box span {
-      color: #94a3b8;
+      color: #bfdbfe;
       font-size: 0.78rem;
       letter-spacing: 0.04em;
       text-transform: uppercase;
@@ -370,9 +411,9 @@ export default function HomePage({ page = 'home' }) {
       position: relative;
       padding: 16px;
       border-radius: 30px;
-      background: linear-gradient(180deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.95));
-      border: 1px solid rgba(148, 163, 184, 0.16);
-      box-shadow: 0 30px 70px rgba(15, 23, 42, 0.62);
+      background: linear-gradient(180deg, rgba(15, 24, 42, 0.8), rgba(15, 24, 42, 0.95));
+      border: 1px solid rgba(148, 160, 184, 0.16);
+      box-shadow: 0 30px 70px rgba(15, 24, 42, 0.62);
       animation: floatCard 6s ease-in-out infinite;
       animation-delay: 0.35s;
       animation-fill-mode: both;
@@ -383,15 +424,17 @@ export default function HomePage({ page = 'home' }) {
       overflow: hidden;
       border-radius: 24px;
       min-height: min(660px, 72vh);
-      border: 1px solid rgba(148, 163, 184, 0.08);
-      background: url('https://images.unsplash.com/photo-1564981797816-1043664bf78d?auto=format&fit=crop&w=1600&q=85') center/cover no-repeat;
+      border: 1px solid rgba(148, 160, 184, 0.08);
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
       animation: campusZoom 12s ease-in-out infinite alternate;
     }
 
     .visual-overlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, rgba(2, 8, 23, 0.05), rgba(2, 8, 23, 0.72));
+      background: linear-gradient(180deg, rgba(2, 9, 23, 0.05), rgba(2, 9, 23, 0.72));
     }
 
     .hero-logo-center {
@@ -408,9 +451,9 @@ export default function HomePage({ page = 'home' }) {
       position: absolute;
       width: 210px;
       height: 210px;
-      border: 1px solid rgba(250, 204, 21, 0.52);
+      border: 1px solid rgba(110, 231, 183, 0.52);
       border-radius: 50%;
-      box-shadow: 0 0 0 18px rgba(250, 204, 21, 0.06), 0 0 70px rgba(250, 204, 21, 0.3);
+      box-shadow: 0 0 0 18px rgba(16, 185, 129, 0.08), 0 0 70px rgba(16, 185, 129, 0.3);
       animation: logoOrbit 5s ease-in-out infinite;
     }
 
@@ -420,11 +463,11 @@ export default function HomePage({ page = 'home' }) {
       padding: 10px;
       display: grid;
       place-items: center;
-      border: 2px solid rgba(250, 204, 21, 0.92);
+      border: 2px solid rgba(52, 211, 153, 0.82);
       border-radius: 28px;
-      background: rgba(2, 8, 23, 0.72);
-      box-shadow: 0 20px 70px rgba(2, 8, 23, 0.64);
-      color: #facc15;
+      background: rgba(2, 9, 23, 0.72);
+      box-shadow: 0 20px 70px rgba(2, 9, 23, 0.64);
+      color: #a7f3d0;
       animation: logoFloat 4s ease-in-out infinite;
     }
 
@@ -440,12 +483,12 @@ export default function HomePage({ page = 'home' }) {
       left: 26px;
       bottom: 26px;
       width: min(260px, 72%);
-      background: rgba(15, 23, 42, 0.75);
+      background: rgba(15, 24, 42, 0.75);
       backdrop-filter: blur(12px);
-      border: 1px solid rgba(148, 163, 184, 0.18);
+      border: 1px solid rgba(148, 160, 184, 0.18);
       border-radius: 18px;
       padding: 18px 16px;
-      box-shadow: 0 18px 30px rgba(15, 23, 42, 0.45);
+      box-shadow: 0 18px 30px rgba(15, 24, 42, 0.45);
       animation: revealUp 0.8s 0.65s ease both;
     }
 
@@ -454,7 +497,7 @@ export default function HomePage({ page = 'home' }) {
       align-items: center;
       justify-content: space-between;
       margin-bottom: 10px;
-      color: #e2e8f0;
+      color: #e2e7f0;
       font-weight: 700;
       font-size: 0.9rem;
     }
@@ -463,7 +506,7 @@ export default function HomePage({ page = 'home' }) {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      color: #cbd5e1;
+      color: #cbd2e1;
       font-size: 0.8rem;
       margin-top: 8px;
     }
@@ -471,7 +514,7 @@ export default function HomePage({ page = 'home' }) {
     .mini-pill {
       padding: 4px 8px;
       border-radius: 999px;
-      background: rgba(34, 197, 94, 0.12);
+      background: rgba(34, 88, 197, 0.12);
       color: #86efac;
       border: 1px solid rgba(74, 222, 128, 0.2);
       font-size: 0.7rem;
@@ -483,20 +526,20 @@ export default function HomePage({ page = 'home' }) {
     .contact-section {
       margin: 72px -32px 0;
       padding: 48px 32px 32px;
-      border-top: 1px solid rgba(148, 163, 184, 0.22);
+      border-top: 1px solid rgba(148, 160, 184, 0.22);
       scroll-margin-top: 24px;
     }
 
     .feature-section {
-      background: linear-gradient(110deg, rgba(14, 116, 144, 0.12), transparent 72%);
+      background: linear-gradient(110deg, rgba(14, 57, 144, 0.12), transparent 72%);
     }
 
     .project-section {
-      background: linear-gradient(110deg, rgba(22, 101, 52, 0.12), transparent 72%);
+      background: linear-gradient(110deg, rgba(22, 48, 101, 0.12), transparent 72%);
     }
 
     .contact-section {
-      background: linear-gradient(110deg, rgba(180, 83, 9, 0.12), transparent 72%);
+      background: linear-gradient(110deg, rgba(9, 66, 180, 0.12), transparent 72%);
     }
 
     .hero {
@@ -515,12 +558,12 @@ export default function HomePage({ page = 'home' }) {
       margin: 0;
       font-size: clamp(2rem, 3vw, 2.8rem);
       letter-spacing: -0.05em;
-      color: #f8fafc;
+      color: #f8f9fc;
     }
 
     .section-heading p {
       max-width: 600px;
-      color: #94a3b8;
+      color: #94a0b8;
       line-height: 1.7;
       margin: 0;
     }
@@ -534,8 +577,8 @@ export default function HomePage({ page = 'home' }) {
     .feature-card {
       padding: 22px 18px 18px;
       border-radius: 22px;
-      border: 1px solid rgba(148, 163, 184, 0.14);
-      background: rgba(15, 23, 42, 0.62);
+      border: 1px solid rgba(148, 160, 184, 0.14);
+      background: rgba(15, 24, 42, 0.62);
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
       transition: transform 0.2s ease, border-color 0.2s ease;
       position: relative;
@@ -549,7 +592,7 @@ export default function HomePage({ page = 'home' }) {
       top: 0;
       width: 100%;
       height: 3px;
-      background: linear-gradient(90deg, #facc15, #38bdf8);
+      background: linear-gradient(90deg, #1c64f3, #3b79f5);
       transform: scaleX(0);
       transform-origin: left;
       transition: transform 0.3s ease;
@@ -557,8 +600,8 @@ export default function HomePage({ page = 'home' }) {
 
     .feature-card:hover {
       transform: translateY(-4px);
-      border-color: rgba(96, 165, 250, 0.45);
-      box-shadow: 0 18px 36px rgba(2, 6, 23, 0.28);
+      border-color: rgba(96, 147, 250, 0.45);
+      box-shadow: 0 18px 36px rgba(2, 9, 23, 0.28);
     }
 
     .feature-card:hover::before {
@@ -571,9 +614,9 @@ export default function HomePage({ page = 'home' }) {
       border-radius: 16px;
       display: grid;
       place-items: center;
-      background: linear-gradient(135deg, rgba(59,130,246,0.18), rgba(99,102,241,0.12));
-      border: 1px solid rgba(147, 197, 253, 0.24);
-      color: #bfdbfe;
+      background: linear-gradient(135deg, rgba(60, 122, 245,0.18), rgba(99, 146, 241,0.12));
+      border: 1px solid rgba(147, 182, 253, 0.24);
+      color: #bfd4fe;
       margin-bottom: 18px;
       transition: transform 0.25s ease, background 0.25s ease;
     }
@@ -581,18 +624,18 @@ export default function HomePage({ page = 'home' }) {
     .feature-card:hover .icon-box,
     .contact-card:hover .icon-box {
       transform: rotate(-5deg) scale(1.06);
-      background: linear-gradient(135deg, rgba(250,204,21,0.24), rgba(59,130,246,0.2));
+      background: linear-gradient(135deg, rgba(28, 100, 243,0.24), rgba(60, 122, 245,0.2));
     }
 
     .feature-card h4 {
       margin: 0 0 8px;
-      color: #f8fafc;
+      color: #f8f9fc;
       font-size: 1.1rem;
     }
 
     .feature-card p {
       margin: 0;
-      color: #94a3b8;
+      color: #94a0b8;
       line-height: 1.7;
       font-size: 0.96rem;
     }
@@ -608,10 +651,10 @@ export default function HomePage({ page = 'home' }) {
 
     .project-box {
       border-radius: 28px;
-      background: rgba(15, 23, 42, 0.66);
-      border: 1px solid rgba(148, 163, 184, 0.16);
+      background: rgba(15, 24, 42, 0.66);
+      border: 1px solid rgba(148, 160, 184, 0.16);
       padding: 28px;
-      box-shadow: 0 18px 40px rgba(2, 6, 23, 0.25);
+      box-shadow: 0 18px 40px rgba(2, 9, 23, 0.25);
       position: relative;
       overflow: hidden;
       animation: revealLeft 0.8s 0.12s ease both;
@@ -624,12 +667,12 @@ export default function HomePage({ page = 'home' }) {
       left: 0;
       width: 5px;
       height: 100%;
-      background: linear-gradient(180deg, #facc15, #38bdf8);
-      box-shadow: 0 0 28px rgba(250, 204, 21, 0.32);
+      background: linear-gradient(180deg, #1c64f3, #3b79f5);
+      box-shadow: 0 0 28px rgba(59, 130, 246, 0.32);
     }
 
     .project-box p {
-      color: #cbd5e1;
+      color: #cbd2e1;
       line-height: 1.8;
       font-size: 1.02rem;
     }
@@ -647,7 +690,7 @@ export default function HomePage({ page = 'home' }) {
       align-items: center;
       gap: 10px;
       font-size: 0.96rem;
-      color: #e2e8f0;
+      color: #e2e7f0;
     }
 
     .project-visual {
@@ -655,9 +698,9 @@ export default function HomePage({ page = 'home' }) {
       border-radius: 28px;
       overflow: hidden;
       position: relative;
-      background: #0f172a;
-      border: 1px solid rgba(148, 163, 184, 0.16);
-      box-shadow: 0 18px 40px rgba(2, 6, 23, 0.28);
+      background: #0f182a;
+      border: 1px solid rgba(148, 160, 184, 0.16);
+      box-shadow: 0 18px 40px rgba(2, 9, 23, 0.28);
       animation: revealRight 0.9s 0.25s ease both;
       transform-style: preserve-3d;
     }
@@ -681,16 +724,16 @@ export default function HomePage({ page = 'home' }) {
       height: 38px;
       display: grid;
       place-items: center;
-      border: 1px solid rgba(226, 232, 240, 0.45);
+      border: 1px solid rgba(226, 231, 240, 0.45);
       border-radius: 50%;
-      background: rgba(15, 23, 42, 0.72);
-      color: #f8fafc;
+      background: rgba(15, 24, 42, 0.72);
+      color: #f8f9fc;
       cursor: pointer;
       transition: background 0.2s ease, transform 0.2s ease;
     }
 
     .project-photo-control:hover {
-      background: rgba(37, 99, 235, 0.88);
+      background: rgba(37, 103, 235, 0.88);
       transform: scale(1.06);
     }
 
@@ -701,7 +744,7 @@ export default function HomePage({ page = 'home' }) {
       content: '';
       position: absolute;
       inset: 12px;
-      border: 1px solid rgba(250, 204, 21, 0.42);
+      border: 1px solid rgba(59, 130, 246, 0.42);
       border-radius: 20px;
       z-index: 2;
       pointer-events: none;
@@ -712,7 +755,7 @@ export default function HomePage({ page = 'home' }) {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, rgba(15, 23, 42, 0.1), rgba(15, 23, 42, 0.72));
+      background: linear-gradient(180deg, rgba(15, 24, 42, 0.1), rgba(15, 24, 42, 0.72));
       z-index: 1;
       pointer-events: none;
     }
@@ -722,11 +765,11 @@ export default function HomePage({ page = 'home' }) {
       left: 24px;
       bottom: 24px;
       z-index: 3;
-      background: rgba(15, 23, 42, 0.76);
-      border: 1px solid rgba(148, 163, 184, 0.14);
+      background: rgba(15, 24, 42, 0.76);
+      border: 1px solid rgba(148, 160, 184, 0.14);
       border-radius: 14px;
       padding: 14px 16px;
-      color: #f8fafc;
+      color: #f8f9fc;
       max-width: 220px;
       backdrop-filter: blur(8px);
       animation: badgeFloat 4.5s ease-in-out infinite;
@@ -737,7 +780,7 @@ export default function HomePage({ page = 'home' }) {
       position: absolute;
       right: 12px;
       top: 10px;
-      color: rgba(250, 204, 21, 0.72);
+      color: rgba(147, 197, 253, 0.9);
       font-size: 0.62rem;
       font-weight: 900;
       letter-spacing: 0.12em;
@@ -747,7 +790,7 @@ export default function HomePage({ page = 'home' }) {
       display: block;
       font-size: 0.8rem;
       letter-spacing: 0.08em;
-      color: #93c5fd;
+      color: #93b6fd;
       text-transform: uppercase;
       margin-bottom: 6px;
     }
@@ -761,15 +804,15 @@ export default function HomePage({ page = 'home' }) {
     .contact-card {
       padding: 24px 20px;
       border-radius: 22px;
-      background: rgba(15, 23, 42, 0.64);
-      border: 1px solid rgba(148, 163, 184, 0.15);
+      background: rgba(15, 24, 42, 0.64);
+      border: 1px solid rgba(148, 160, 184, 0.15);
       transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
     }
 
     .contact-card:hover {
       transform: translateY(-5px);
-      border-color: rgba(250, 204, 21, 0.42);
-      box-shadow: 0 18px 36px rgba(2, 6, 23, 0.25);
+      border-color: rgba(59, 130, 246, 0.42);
+      box-shadow: 0 18px 36px rgba(2, 9, 23, 0.25);
     }
 
     .contact-card .icon-box {
@@ -779,13 +822,13 @@ export default function HomePage({ page = 'home' }) {
     .contact-card h4 {
       font-size: 1.04rem;
       margin: 0 0 8px;
-      color: #f8fafc;
+      color: #f8f9fc;
     }
 
     .contact-card p,
     .contact-card a {
       margin: 0;
-      color: #cbd5e1;
+      color: #cbd2e1;
       text-decoration: none;
       line-height: 1.7;
     }
@@ -801,7 +844,7 @@ export default function HomePage({ page = 'home' }) {
 
     .site-footer {
       margin-top: 80px;
-      border-top: 1px solid rgba(148, 163, 184, 0.16);
+      border-top: 1px solid rgba(148, 160, 184, 0.16);
       padding-top: 28px;
     }
 
@@ -820,29 +863,29 @@ export default function HomePage({ page = 'home' }) {
       justify-content: center;
       flex-wrap: wrap;
       gap: 18px;
-      color: #cbd5e1;
+      color: #cbd2e1;
     }
 
     .footer-links a {
-      color: #cbd5e1;
+      color: #cbd2e1;
       text-decoration: none;
       transition: color 0.2s ease;
     }
 
     .footer-links a:hover {
-      color: #facc15;
+      color: #93C5FD;
     }
 
     .footer-copy {
-      color: #94a3b8;
+      color: #94a0b8;
       text-align: right;
       line-height: 1.6;
       font-size: 0.92rem;
     }
 
     @keyframes glow {
-      0% { box-shadow: 0 12px 24px rgba(99, 102, 241, 0.38); }
-      100% { box-shadow: 0 18px 34px rgba(96, 165, 250, 0.52); }
+      0% { box-shadow: 0 12px 24px rgba(99, 146, 241, 0.38); }
+      100% { box-shadow: 0 18px 34px rgba(96, 147, 250, 0.52); }
     }
 
     @keyframes logoShine {
@@ -908,6 +951,23 @@ export default function HomePage({ page = 'home' }) {
     @keyframes projectPhotoMotion {
       from { opacity: 0.55; transform: scale(1.08); }
       to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes homeBackgroundCycle {
+      0%, 12% { opacity: 1; transform: scale(1.04); }
+      17%, 100% { opacity: 0; transform: scale(1.12); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .home-background-image {
+        animation: none;
+        opacity: 0;
+        transform: none;
+      }
+
+      .home-background-image:first-child {
+        opacity: 1;
+      }
     }
 
     @media (max-width: 980px) {
@@ -997,14 +1057,25 @@ export default function HomePage({ page = 'home' }) {
       <style>{styles}</style>
 
       <div className="home-shell">
+        <div className="home-background" aria-hidden="true">
+          {backgroundImages.map((image, index) => (
+            <img
+              key={image}
+              className="home-background-image"
+              src={`/login-backgrounds/${image}`}
+              alt=""
+              style={{ animationDelay: `-${index * 6}s` }}
+            />
+          ))}
+        </div>
         <div className="home-inner">
           <header className="home-header">
             <div className="brand-wrap">
-              <div className="brand-logo" aria-label="Mekdela Abba University logo">
-                <img className="brand-logo-image" src="/mau-logo.svg" alt="Mekdela Abba University logo" />
+              <div className="brand-logo" aria-label="Mekdela Amba University logo">
+                <img className="brand-logo-image" src="/mau-logo.png" alt="Mekdela Amba University logo" />
               </div>
               <div className="brand-copy">
-                <h2>Mekdela Abba University</h2>
+                <h2>Mekdela Amba University</h2>
                 <small>Smart Workforce</small>
               </div>
             </div>
@@ -1062,11 +1133,14 @@ export default function HomePage({ page = 'home' }) {
             </div>
 
             <div className="visual-card" aria-label="Workplace attendance overview">
-              <div className="visual-frame">
+              <div
+                className="visual-frame"
+                style={{ backgroundImage: `url(${communityPhotos[0]})` }}
+              >
                 <div className="visual-overlay" />
-                <div className="hero-logo-center" aria-label="Mekdela Abba University logo">
+                <div className="hero-logo-center" aria-label="Mekdela Amba University logo">
                   <div className="hero-logo-badge">
-                    <img className="hero-mau-logo" src="/mau-logo.svg" alt="Mekdela Abba University logo" />
+                    <img className="hero-mau-logo" src="/mau-logo.png" alt="Mekdela Amba University logo" />
                   </div>
                 </div>
                 <div className="mini-panel">
@@ -1161,7 +1235,7 @@ export default function HomePage({ page = 'home' }) {
                   key={communityPhotos[projectPhotoIndex]}
                   className="project-photo"
                   src={communityPhotos[projectPhotoIndex]}
-                  alt={`Mekdela Abba University community photo ${projectPhotoIndex + 1}`}
+                  alt={`Mekdela Amba University community photo ${projectPhotoIndex + 1}`}
                 />
                 <button type="button" className="project-photo-control project-photo-prev"
                   onClick={() => changeProjectPhoto(-1)} aria-label="Previous community photo">
@@ -1217,11 +1291,11 @@ export default function HomePage({ page = 'home' }) {
             <div className="footer-inner">
               <div>
                 <div className="brand-wrap">
-                  <div className="brand-logo" aria-label="Mekdela Abba University logo">
-                    <img className="brand-logo-image" src="/mau-logo.svg" alt="Mekdela Abba University logo" />
+                  <div className="brand-logo" aria-label="Mekdela Amba University logo">
+                    <img className="brand-logo-image" src="/mau-logo.png" alt="Mekdela Amba University logo" />
                   </div>
                   <div className="brand-copy">
-                    <h2>Mekdela Abba University</h2>
+                    <h2>Mekdela Amba University</h2>
                     <small>Smart Workforce</small>
                   </div>
                 </div>
@@ -1235,7 +1309,7 @@ export default function HomePage({ page = 'home' }) {
               </div>
 
               <div className="footer-copy">
-                © 2026 Mekdela Abba University Attendance.<br />
+                © 2026 Mekdela Amba University Attendance.<br />
                 All rights reserved.
               </div>
             </div>

@@ -53,7 +53,7 @@ export default function MyDashboard() {
         <KpiCard label="Days Present"  value={stats?.presentDays  ?? 0} color="#22c55e" icon="✅" />
         <KpiCard label="Days Late"     value={stats?.lateDays     ?? 0} color="#f59e0b" icon="⏰" />
         <KpiCard label="Days Absent"   value={stats?.absentDays   ?? 0} color="#ef4444" icon="❌" />
-        <KpiCard label="Attendance Rate" value={`${attendanceRate}%`}   color="#3b82f6" icon="📊" />
+        <KpiCard label="Attendance Rate" value={`${attendanceRate}%`}   color="#3b79f6" icon="📊" />
       </div>
 
       {/* Today's status */}
@@ -95,7 +95,7 @@ function TodayStatus({ recentRecords }) {
             {todayRecord.status === 'Present' ? '✅' : todayRecord.status === 'Late' ? '⏰' : '❌'}
           </span>
           <div>
-            <p style={{ margin: 0, fontWeight: 700, fontSize: 16, color: '#0f172a' }}>
+            <p style={{ margin: 0, fontWeight: 700, fontSize: 16, color: '#0f182a' }}>
               {todayRecord.status === 'Present' ? 'On Time' : todayRecord.status === 'Late' ? 'Arrived Late' : 'Absent'}
             </p>
             <p style={{ margin: 0, color: '#64748b', fontSize: 13 }}>
@@ -104,7 +104,7 @@ function TodayStatus({ recentRecords }) {
           </div>
         </div>
       ) : (
-        <p style={{ color: '#94a3b8', fontSize: 14 }}>You have not checked in today yet. Head to the kiosk to check in.</p>
+        <p style={{ color: '#94a0b8', fontSize: 14 }}>You have not checked in today yet. Head to the kiosk to check in.</p>
       )}
     </div>
   );
@@ -122,13 +122,13 @@ function KpiCard({ label, value, color, icon }) {
 
 function StatusBadge({ status }) {
   const map = { Present: ['#dcfce7','#16a34a'], Late: ['#fef9c3','#ca8a04'], Absent: ['#fee2e2','#dc2626'] };
-  const [bg, fg] = map[status] ?? ['#f1f5f9','#64748b'];
+  const [bg, fg] = map[status] ?? ['#f1f4f9','#64748b'];
   return <span style={{ background: bg, color: fg, borderRadius: 20, padding: '3px 10px', fontSize: 12, fontWeight: 600 }}>{status}</span>;
 }
 
 const styles = {
   banner: {
-    background: 'linear-gradient(135deg, #1e293b 0%, #1e40af 100%)',
+    background: 'linear-gradient(135deg, #1c273d 0%, #1e4eaf 100%)',
     borderRadius: 14,
     padding: '24px 28px',
     color: '#fff',
@@ -143,17 +143,17 @@ const styles = {
   empIdLabel: { display: 'block', fontSize: 11, opacity: 0.6, marginBottom: 3, textTransform: 'uppercase', letterSpacing: '0.5px' },
   empIdValue: { fontSize: 18, fontWeight: 700, fontFamily: 'monospace' },
   kpiGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 16, marginBottom: 20 },
-  kpiCard: { background: '#fff', borderRadius: 12, padding: '18px 16px', textAlign: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.07)' },
+  kpiCard: { background: '#f4f8ff', borderRadius: 12, padding: '18px 16px', textAlign: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.07)' },
   kpiValue: { fontSize: 28, fontWeight: 800, margin: '8px 0 4px' },
   kpiLabel: { margin: 0, color: '#64748b', fontSize: 12, fontWeight: 500 },
-  card: { background: '#fff', borderRadius: 12, padding: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.07)', marginBottom: 20 },
+  card: { background: '#f4f8ff', borderRadius: 12, padding: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.07)', marginBottom: 20 },
   cardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
-  cardTitle: { margin: 0, fontSize: 14, fontWeight: 700, color: '#0f172a' },
-  viewAllBtn: { background: 'none', border: 'none', color: '#3b82f6', fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: 0 },
+  cardTitle: { margin: 0, fontSize: 14, fontWeight: 700, color: '#0f182a' },
+  viewAllBtn: { background: 'none', border: 'none', color: '#3b79f6', fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: 0 },
   todayRow: { display: 'flex', alignItems: 'center', gap: 14 },
-  recentRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #f1f5f9' },
-  recentDate: { margin: 0, fontWeight: 600, fontSize: 13, color: '#1e293b' },
-  recentTime: { margin: 0, fontSize: 12, color: '#94a3b8' },
-  emptyText: { color: '#94a3b8', fontSize: 13, textAlign: 'center', padding: 12 },
+  recentRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #f1f4f9' },
+  recentDate: { margin: 0, fontWeight: 600, fontSize: 13, color: '#1e283b' },
+  recentTime: { margin: 0, fontSize: 12, color: '#94a0b8' },
+  emptyText: { color: '#94a0b8', fontSize: 13, textAlign: 'center', padding: 12 },
   error: { color: '#dc2626', padding: 16 },
 };

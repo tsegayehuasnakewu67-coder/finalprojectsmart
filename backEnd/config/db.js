@@ -9,6 +9,9 @@ const connectDB = async () => {
   try {
     const conn = await mongoose.connect(mongoUri, {
       dbName: process.env.MONGODB_DB_NAME || 'SmartAttendanceDB',
+      maxPoolSize: Number.parseInt(process.env.MONGODB_MAX_POOL_SIZE, 10) || 20,
+      minPoolSize: Number.parseInt(process.env.MONGODB_MIN_POOL_SIZE, 10) || 0,
+      maxIdleTimeMS: Number.parseInt(process.env.MONGODB_MAX_IDLE_TIME_MS, 10) || 60000,
     });
     console.log('MongoDB Connected Successfully');
     return conn;

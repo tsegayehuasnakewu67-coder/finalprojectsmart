@@ -1,9 +1,9 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
-const crypto = require('crypto');
 const mongoose = require('mongoose');
 const connectDB = require('./config/db');
+const { getDefaultEmployeePassword } = require('./utils/passwordPolicy');
 
 mongoose.set('autoIndex', false);
 
@@ -50,41 +50,10 @@ const recentWeekdays = (count) => {
 
 const dateAt = (date, time) => new Date(`${date}T${time}:00.000Z`);
 
-const seedAdmin = async (User) => {
-  const email = 'admin@smartattendance.com';
-  const password = process.env.ADMIN_PASSWORD;
-  if (!password || password.length < 8) {
-    throw new Error('ADMIN_PASSWORD is required in backEnd/.env and must contain at least 8 characters.');
-  }
-
-  let admin = await User.findOne({ email });
-  if (!admin) {
-    const employeeId = 'ADMIN-SYSTEM';
-    if (await User.exists({ employeeId })) {
-      throw new Error(`Cannot create the requested administrator: ${employeeId} is already assigned.`);
-    }
-    admin = new User({
-      employeeId,
-      email,
-      department: 'Administration',
-      position: 'System Administrator',
-    });
-  }
-
-  admin.name = 'System Administrator';
-  admin.fullName = 'System Administrator';
-  admin.email = email;
-  admin.department = 'Administration';
-  admin.position = 'System Administrator';
-  admin.role = 'admin';
-  admin.isActive = true;
-  admin.password = password;
-  await admin.save();
-  return admin;
-};
-
 const seedEmployees = async (User, syncEmployeeForUser) => {
   const users = [];
+  const defaultPassword = getDefaultEmployeePassword();
+
   for (const sample of employeesToSeed) {
     const email = emailFor(sample);
     let user = await User.findOne({ employeeId: sample.employeeId });
@@ -99,11 +68,13 @@ const seedEmployees = async (User, syncEmployeeForUser) => {
         fullName: `${sample.firstName} ${sample.lastName}`,
         employeeId: sample.employeeId,
         email,
-        password: crypto.randomBytes(32).toString('hex'),
+        password: defaultPassword,
         department: sample.department,
         position: sample.position,
         role: 'employee',
         isActive: true,
+        mustChangePassword: true,
+        passwordChangedAt: null,
       });
       await user.save();
     } else {
@@ -118,6 +89,9 @@ const seedEmployees = async (User, syncEmployeeForUser) => {
       user.position = sample.position;
       user.role = 'employee';
       user.isActive = true;
+      user.password = defaultPassword;
+      user.mustChangePassword = true;
+      user.passwordChangedAt = null;
       await user.save();
     }
 
@@ -344,9 +318,10 @@ const main = async () => {
     const Notification = require('./models/Notification');
     const ShiftSettings = require('./models/ShiftSettings');
     const { syncEmployeeForUser } = require('./utils/employeeSync');
+    const ensureAdmin = require('./utils/adminSeed');
 
     await preserveLegacyLeaveRequests();
-    const admin = await seedAdmin(User);
+    const admin = await ensureAdmin();
     const users = await seedEmployees(User, syncEmployeeForUser);
     const dates = recentWeekdays(5);
 

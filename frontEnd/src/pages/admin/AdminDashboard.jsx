@@ -16,8 +16,8 @@ const PIE_COLORS = ['#22c55e', '#f59e0b', '#ef4444'];
 
 /* ── Shared inline style tokens ─────────────────────────────────────────── */
 const CARD = {
-  background:   '#0f172a',
-  border:       '1px solid #1e293b',
+  background:   '#0f182a',
+  border:       '1px solid #1e283b',
   borderRadius: '16px',
   padding:      '24px',
 };
@@ -61,7 +61,7 @@ export default function AdminDashboard() {
 
       {/* ── Page heading ── */}
       <div>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f1f5f9', margin: '0 0 4px', letterSpacing: '-0.025em' }}>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f1f4f9', margin: '0 0 4px', letterSpacing: '-0.025em' }}>
           MAU Admin Control Center
         </h1>
         <p style={{ fontSize: '0.875rem', color: '#64748b', margin: 0 }}>
@@ -85,13 +85,13 @@ export default function AdminDashboard() {
         <div style={CARD}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
             <TrendingUp size={15} color="#64748b" />
-            <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#cbd5e1' }}>Monthly Attendance Trend</span>
+            <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#cbd2e1' }}>Monthly Attendance Trend</span>
           </div>
           <ResponsiveContainer width="100%" height={230}>
             <BarChart data={monthlyTrend} margin={{ top: 4, right: 8, left: -24, bottom: 0 }}>
-              <XAxis dataKey="_id" tick={{ fontSize: 10, fill: '#94a3b8' }} />
-              <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} />
-              <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8, fontSize: 12 }} />
+              <XAxis dataKey="_id" tick={{ fontSize: 10, fill: '#94a0b8' }} />
+              <YAxis tick={{ fontSize: 10, fill: '#94a0b8' }} />
+              <Tooltip contentStyle={{ background: '#1c273d', border: '1px solid #333e55', borderRadius: 8, fontSize: 12 }} />
               <Bar dataKey="present" name="Present" fill="#22c55e" radius={[3,3,0,0]} />
               <Bar dataKey="late"    name="Late"    fill="#f59e0b" radius={[3,3,0,0]} />
             </BarChart>
@@ -100,7 +100,7 @@ export default function AdminDashboard() {
 
         {/* Today breakdown pie */}
         <div style={CARD}>
-          <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#cbd5e1', margin: '0 0 20px' }}>
+          <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#cbd2e1', margin: '0 0 20px' }}>
             Today's Breakdown
           </p>
           <ResponsiveContainer width="100%" height={230}>
@@ -112,7 +112,7 @@ export default function AdminDashboard() {
               >
                 {pieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i]} />)}
               </Pie>
-              <Legend wrapperStyle={{ fontSize: 11, color: '#94a3b8' }} />
+              <Legend wrapperStyle={{ fontSize: 11, color: '#94a0b8' }} />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -123,15 +123,15 @@ export default function AdminDashboard() {
 
         {/* Department bar */}
         <div style={CARD}>
-          <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#cbd5e1', margin: '0 0 20px' }}>
+          <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#cbd2e1', margin: '0 0 20px' }}>
             Today by Department
           </p>
           <ResponsiveContainer width="100%" height={210}>
             <BarChart data={deptStats} layout="vertical" margin={{ top: 0, right: 8, left: 60, bottom: 0 }}>
-              <XAxis type="number" tick={{ fontSize: 10, fill: '#94a3b8' }} />
-              <YAxis dataKey="_id" type="category" tick={{ fontSize: 10, fill: '#94a3b8' }} />
-              <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8, fontSize: 12 }} />
-              <Bar dataKey="count" name="Check-ins" fill="#3b82f6" radius={[0,3,3,0]} />
+              <XAxis type="number" tick={{ fontSize: 10, fill: '#94a0b8' }} />
+              <YAxis dataKey="_id" type="category" tick={{ fontSize: 10, fill: '#94a0b8' }} />
+              <Tooltip contentStyle={{ background: '#1c273d', border: '1px solid #333e55', borderRadius: 8, fontSize: 12 }} />
+              <Bar dataKey="count" name="Check-ins" fill="#3b79f6" radius={[0,3,3,0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -139,17 +139,17 @@ export default function AdminDashboard() {
         {/* Recent check-ins list */}
         <div style={CARD}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-            <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#cbd5e1' }}>Recent Check-ins</span>
+            <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#cbd2e1' }}>Recent Check-ins</span>
             <button
               onClick={() => navigate('/admin/reports')}
               style={{
                 display: 'flex', alignItems: 'center', gap: '4px',
                 background: 'none', border: 'none', cursor: 'pointer',
-                fontSize: '0.75rem', color: '#60a5fa',
+                fontSize: '0.75rem', color: '#6093fa',
                 padding: 0, transition: 'color 0.12s',
               }}
-              onMouseEnter={e => { e.currentTarget.style.color = '#93c5fd'; }}
-              onMouseLeave={e => { e.currentTarget.style.color = '#60a5fa'; }}
+              onMouseEnter={e => { e.currentTarget.style.color = '#93b6fd'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = '#6093fa'; }}
             >
               View all <ChevronRight size={12} />
             </button>
@@ -165,14 +165,14 @@ export default function AdminDashboard() {
               <div key={r._id} style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 padding: '10px 0',
-                borderBottom: '1px solid #1e293b',
+                borderBottom: '1px solid #1e283b',
               }}>
                 <div>
-                  <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600, color: '#e2e8f0' }}>{r.fullName}</p>
+                  <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600, color: '#e2e7f0' }}>{r.fullName}</p>
                   <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>{r.department}</p>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <p style={{ margin: '0 0 3px', fontSize: '0.75rem', color: '#94a3b8' }}>
+                  <p style={{ margin: '0 0 3px', fontSize: '0.75rem', color: '#94a0b8' }}>
                     {formatEthiopianTime(r.checkInTime)}
                   </p>
                   <StatusBadge status={r.status} />
@@ -188,10 +188,10 @@ export default function AdminDashboard() {
 
 /* ── Sub-components ─────────────────────────────────────────────────────── */
 const kpiColors = {
-  blue:  { bg: 'rgba(29,78,216,0.12)',  border: '#1e3a8a', icon: '#60a5fa', val: '#60a5fa'  },
-  green: { bg: 'rgba(21,128,61,0.12)',  border: '#14532d', icon: '#4ade80', val: '#4ade80'  },
-  amber: { bg: 'rgba(180,83,9,0.12)',   border: '#78350f', icon: '#fbbf24', val: '#fbbf24'  },
-  red:   { bg: 'rgba(185,28,28,0.12)',  border: '#7f1d1d', icon: '#f87171', val: '#f87171'  },
+  blue:  { bg: 'rgba(29, 91, 216,0.12)',  border: '#1e428a', icon: '#6093fa', val: '#6093fa'  },
+  green: { bg: 'rgba(21, 57, 128,0.12)',  border: '#14532d', icon: '#4ade80', val: '#4ade80'  },
+  amber: { bg: 'rgba(9, 66, 180,0.12)',   border: '#78350f', icon: '#fbbf24', val: '#fbbf24'  },
+  red:   { bg: 'rgba(28, 80, 185,0.12)',  border: '#7f1d1d', icon: '#f87171', val: '#f87171'  },
 };
 
 function KpiCard({ label, value, icon: Icon, color }) {
@@ -210,7 +210,7 @@ function KpiCard({ label, value, icon: Icon, color }) {
             {value}
           </p>
         </div>
-        <div style={{ padding: '8px', borderRadius: '8px', background: 'rgba(30,41,59,0.6)' }}>
+        <div style={{ padding: '8px', borderRadius: '8px', background: 'rgba(28, 39, 61,0.6)' }}>
           <Icon size={18} color={c.icon} />
         </div>
       </div>
@@ -220,11 +220,11 @@ function KpiCard({ label, value, icon: Icon, color }) {
 
 function StatusBadge({ status }) {
   const map = {
-    Present: { bg: 'rgba(21,128,61,0.3)',  color: '#86efac', border: 'rgba(21,128,61,0.5)'  },
-    Late:    { bg: 'rgba(180,83,9,0.3)',   color: '#fcd34d', border: 'rgba(180,83,9,0.5)'   },
-    Absent:  { bg: 'rgba(185,28,28,0.3)',  color: '#fca5a5', border: 'rgba(185,28,28,0.5)'  },
+    Present: { bg: 'rgba(21, 57, 128,0.3)',  color: '#86efac', border: 'rgba(21,128,61,0.5)'  },
+    Late:    { bg: 'rgba(9, 66, 180,0.3)',   color: '#fcd34d', border: 'rgba(180,83,9,0.5)'   },
+    Absent:  { bg: 'rgba(28, 80, 185,0.3)',  color: '#fca5a5', border: 'rgba(185,28,28,0.5)'  },
   };
-  const s = map[status] ?? { bg: 'rgba(30,41,59,0.5)', color: '#94a3b8', border: '#334155' };
+  const s = map[status] ?? { bg: 'rgba(28, 39, 61,0.5)', color: '#94a0b8', border: '#333e55' };
   return (
     <span style={{
       display: 'inline-block',
@@ -242,7 +242,7 @@ function ErrBox({ msg, onRetry }) {
   return (
     <div style={{
       padding: '16px', borderRadius: '12px',
-      background: 'rgba(127,29,29,0.3)', border: '1px solid #991b1b',
+      background: 'rgba(29, 62, 127,0.3)', border: '1px solid #991b1b',
       color: '#fca5a5', fontSize: '0.875rem',
     }}>
       {msg}
@@ -253,9 +253,9 @@ function ErrBox({ msg, onRetry }) {
           marginTop: '12px',
           padding: '8px 12px',
           borderRadius: '8px',
-          background: '#1e293b',
+          background: '#1c273d',
           border: '1px solid #475569',
-          color: '#e2e8f0',
+          color: '#e2e7f0',
           cursor: 'pointer',
         }}
       >

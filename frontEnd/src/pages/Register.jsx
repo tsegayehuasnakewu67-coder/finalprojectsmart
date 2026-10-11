@@ -2,8 +2,8 @@
  * Register — Admin onboards a new employee, HR user, or administrator.
  *
  * Layout guarantees (inline styles — immune to Tailwind JIT purge):
- *  • Form card: max-width 960px, background #0f172a,
- *    border 1px solid #1e293b, borderRadius 16px, overflow hidden
+ *  • Form card: max-width 960px, background #0f182a,
+ *    border 1px solid #1e283b, borderRadius 16px, overflow hidden
  *  • All inputs: zero placeholder attributes — labels above only
  *  • Confirm Password: real-time match validation (border colour + hint)
  *  • Password fields: show/hide toggle
@@ -15,19 +15,19 @@ import { authService } from '../services/authService';
 import { userService } from '../services/userService';
 import { loadModels, getDescriptor } from '../utils/faceApi';
 import { CUSTOM_OPTION, DEPARTMENTS, POSITION_OPTIONS } from '../utils/employmentOptions';
-import { formatEthiopianDate, formatEthiopianDateTime } from '../utils/ethiopianDateTime';
 import { Camera, CheckCircle2, UserPlus, ArrowLeft, X, Eye, EyeOff } from 'lucide-react';
 
 const INIT = {
   fullName: '', employeeId: '', email: '', password: '', confirmPassword: '',
   department: '', customDepartment: '', position: '', customPosition: '', role: 'employee',
+  phone: '', gender: '', dateOfBirth: '', address: '', photo: '', status: 'Active',
 };
 
 /* ── Style tokens ───────────────────────────────────────────────────────── */
 const CARD = {
-  background:   '#0f172a',
-  border:       '1px solid #1e293b',
-  borderRadius: '16px',
+  background:   'var(--color-surface)',
+  border:       '1px solid var(--color-border)',
+  borderRadius: 'var(--radius-lg)',
   overflow:     'hidden',
   padding:      '32px',
 };
@@ -36,7 +36,7 @@ const LABEL_STYLE = {
   display: 'block',
   fontSize: '0.6875rem',
   fontWeight: 700,
-  color: '#64748b',
+  color: 'var(--color-text-secondary)',
   textTransform: 'uppercase',
   letterSpacing: '0.07em',
   marginBottom: '6px',
@@ -45,10 +45,10 @@ const LABEL_STYLE = {
 const buildInputStyle = (extra = {}) => ({
   width: '100%',
   padding: '11px 14px',
-  background: '#1e293b',
-  border: '1.5px solid #334155',
-  borderRadius: '10px',
-  color: '#f1f5f9',
+  background: 'var(--color-surface-muted)',
+  border: '1.5px solid var(--color-border)',
+  borderRadius: 'var(--radius-control)',
+  color: 'var(--color-text)',
   fontSize: '0.875rem',
   outline: 'none',
   boxSizing: 'border-box',
@@ -58,7 +58,7 @@ const buildInputStyle = (extra = {}) => ({
 });
 
 const SECTION_DIVIDER = {
-  borderTop: '1px solid #1e293b',
+  borderTop: '1px solid var(--color-border)',
   marginTop: '8px',
   paddingTop: '24px',
 };
@@ -135,6 +135,12 @@ export default function Register() {
           department: user.department,
           position: user.position,
           role: user.role,
+          phone: user.phone || '',
+          gender: user.gender || '',
+          dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().slice(0, 10) : '',
+          address: user.address || '',
+          photo: user.photo || '',
+          status: user.status || (user.isActive ? 'Active' : 'Inactive'),
         }));
       })
       .catch(err => setError(err.message))
@@ -170,30 +176,135 @@ export default function Register() {
   const handleSubmit = async e => {
     e.preventDefault();
     setError(''); setSuccess('');
-    if (!editUserId && form.password !== form.confirmPassword) { setError('Passwords do not match.'); return; }
+    if (!editUserId && form.role !== 'employee' && form.password !== form.confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+    if (!editUserId && form.role !== 'employee'
+      && (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])/.test(form.password) || form.password.length < 12)) {
+      setError('Password must be at least 12 characters and include uppercase, lowercase, a number, and a symbol.');
+      return;
+    }
+    if (editUserId) {
+      const fullName = form.fullName.trim();
+      const email = form.email.trim();
+      const employeeId = form.employeeId.trim();
+      const department = form.department.trim();
+      const position = form.position.trim();
+      if (!fullName || !employeeId || !department || !position || !email) {
+        setError('Full name, employee ID, email, department, and position are required.');
+        return;
+      }
+      if (fullName.length > 201 || employeeId.length > 64 || email.length > 254
+        || department.length > 100 || position.length > 100 || form.phone.trim().length > 32
+        || form.gender.length > 40 || form.address.trim().length > 300 || form.photo.trim().length > 500) {
+        setError('One or more fields exceed the allowed length.');
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setError('Enter a valid email address.');
+        return;
+      }
+      setLoading(true);
+      try {
+        const profile = {
+          fullName,
+          employeeId,
+          email,
+          department,
+          position,
+          role: form.role,
+          phone: form.phone.trim(),
+          gender: form.gender,
+          dateOfBirth: form.dateOfBirth || null,
+          address: form.address.trim(),
+          photo: form.photo.trim(),
+          status: form.status,
+        };
+        let updated;
+        if (employeeProfile?.employeeProfileId) {
+          updated = await userService.updateEmployee(employeeProfile.employeeProfileId, {
+            employeeId,
+            firstName: fullName.split(/\s+/)[0],
+            lastName: fullName.split(/\s+/).slice(1).join(' ') || 'Unknown',
+            email,
+            department,
+            position,
+            role: form.role,
+            phone: form.phone.trim(),
+            gender: form.gender,
+            dateOfBirth: form.dateOfBirth || null,
+            address: form.address.trim(),
+            photo: form.photo.trim(),
+            status: form.status,
+          });
+        } else {
+          updated = await userService.update(editUserId, {
+            ...profile,
+            isActive: form.status !== 'Inactive',
+          });
+        }
+        setEmployeeProfile(current => ({ ...current, ...profile, ...updated }));
+        setSuccess('Employee profile changes saved.');
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
     const department = form.department === CUSTOM_OPTION ? form.customDepartment.trim() : form.department;
     const position = form.position === CUSTOM_OPTION ? form.customPosition.trim() : form.position;
     if (!editUserId && (!department || !position)) { setError('Select or enter a department and position.'); return; }
     if (!face) { setError('Capture the employee face before registering so attendance can recognize them.'); return; }
     setLoading(true);
     try {
-      if (editUserId) {
-        const user = await userService.updateFace(editUserId, face);
-        setSuccess(`Face recognition updated for "${user.fullName}".`);
-        setTimeout(() => navigate('/admin/users'), 1200);
-        return;
-      }
       const payload = { ...form };
       delete payload.confirmPassword;
       delete payload.customDepartment;
       delete payload.customPosition;
+      if (form.role === 'employee') {
+        delete payload.password;
+      }
       payload.department = department;
       payload.position = position;
       payload.faceDescriptor = face;
       const data = await authService.register(payload);
-      setSuccess(`Employee "${data.user.fullName}" registered successfully.`);
+      setSuccess(form.role === 'employee'
+        ? `Employee "${data.user.fullName}" registered. They must change the server-configured default password at first sign-in.`
+        : `Employee "${data.user.fullName}" registered successfully.`);
       setForm(INIT); setFace(null);
       setTimeout(() => navigate('/admin/users'), 1500);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFaceUpdate = async () => {
+    if (!face) {
+      setError('Open the camera and capture a face before updating face recognition.');
+      return;
+    }
+    setError('');
+    setSuccess('');
+    setLoading(true);
+    try {
+      const names = form.fullName.trim().split(/\s+/);
+      await userService.registerFace({
+        employeeId: form.employeeId.trim(),
+        firstName: names[0],
+        lastName: names.slice(1).join(' ') || 'Unknown',
+        department: form.department.trim(),
+        position: form.position.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        faceDescriptor: face,
+      });
+      setEmployeeProfile(current => ({ ...current, faceRegistered: true }));
+      setFace(null);
+      setSuccess(`Face recognition updated for "${form.fullName.trim()}".`);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -208,11 +319,11 @@ export default function Register() {
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <BackBtn onClick={() => navigate(-1)} />
         <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f1f5f9', margin: '0 0 2px', letterSpacing: '-0.025em' }}>
-            {editUserId ? 'Update Employee Face' : 'Register Employee'}
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--color-text)', margin: '0 0 2px', letterSpacing: '-0.025em' }}>
+            {editUserId ? 'Edit Employee' : 'Register Employee'}
           </h1>
-          <p style={{ fontSize: '0.875rem', color: '#64748b', margin: 0 }}>
-            {editUserId ? `Update recognition for ${form.fullName || 'employee'}` : 'Add a new employee to the system'}
+          <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', margin: 0 }}>
+            {editUserId ? `Update profile details for ${form.fullName || 'employee'}` : 'Add a new employee to the system'}
           </p>
         </div>
       </div>
@@ -223,71 +334,70 @@ export default function Register() {
           <div style={CARD}>
 
             {editUserId && (
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                gap: '20px',
-                alignItems: 'start',
-                marginBottom: '24px',
-                paddingBottom: '24px',
-                borderBottom: '1px solid #1e293b',
-              }}>
+              <section className="employee-edit-section">
                 {employeeProfile?.photo && (
                   <img
                     src={employeeProfile.photo}
                     alt={`${employeeProfile.fullName} profile`}
-                    style={{ width: '112px', height: '112px', objectFit: 'cover', borderRadius: '14px', border: '1px solid #334155' }}
+                    className="employee-edit-photo"
                   />
                 )}
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <h2 style={{ margin: '0 0 16px', color: '#f1f5f9', fontSize: '1rem', fontWeight: 700 }}>
-                    Employee Information
-                  </h2>
+                <div className="employee-edit-fields">
+                  <h2 className="employee-edit-heading">Employee Information</h2>
                   {editLoading ? (
-                    <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.875rem' }}>Loading employee details…</p>
+                    <p className="employee-edit-message">Loading employee details…</p>
                   ) : employeeProfile ? (
-                    <div style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-                      gap: '16px 24px',
-                    }}>
-                      <ProfileDetail label="Full Name" value={employeeProfile.fullName} />
-                      <ProfileDetail label="Employee ID" value={employeeProfile.employeeId} />
-                      <ProfileDetail label="Email" value={employeeProfile.email} />
-                      <ProfileDetail label="Department" value={employeeProfile.department} />
-                      <ProfileDetail label="Position" value={employeeProfile.position} />
-                      <ProfileDetail label="Role" value={employeeProfile.role} />
-                      <ProfileDetail label="Phone" value={employeeProfile.phone} />
-                      <ProfileDetail label="Gender" value={employeeProfile.gender} />
-                      <ProfileDetail
-                        label="Date of Birth"
-                        value={employeeProfile.dateOfBirth ? formatEthiopianDate(employeeProfile.dateOfBirth) : ''}
-                      />
-                      <ProfileDetail label="Address" value={employeeProfile.address} />
-                      <ProfileDetail
-                        label="Employment Status"
-                        value={employeeProfile.status || (employeeProfile.isActive ? 'Active' : 'Inactive')}
-                      />
-                      <ProfileDetail
-                        label="Face Recognition"
-                        value={employeeProfile.faceRegistered ? 'Registered' : 'Not registered'}
-                      />
-                      <ProfileDetail
-                        label="Created"
-                        value={employeeProfile.createdAt ? formatEthiopianDateTime(employeeProfile.createdAt) : ''}
-                      />
-                      <ProfileDetail
-                        label="Last Updated"
-                        value={employeeProfile.updatedAt ? formatEthiopianDateTime(employeeProfile.updatedAt) : ''}
-                      />
-                    </div>
+                    <>
+                      <div className="employee-edit-grid">
+                        <EditField label="Full name" name="fullName" value={form.fullName} onChange={set} required />
+                        <EditField label="Employee ID" name="employeeId" value={form.employeeId} onChange={set} required />
+                        <EditField label="Email" name="email" type="email" value={form.email} onChange={set} required />
+                        <EditField label="Phone number" name="phone" type="tel" value={form.phone} onChange={set} />
+                        <EditField label="Department" name="department" value={form.department} onChange={set} required />
+                        <EditField label="Position" name="position" value={form.position} onChange={set} required />
+                        <div className="employee-edit-field">
+                          <label htmlFor="edit-role">Role</label>
+                          <select id="edit-role" name="role" value={form.role} onChange={set}>
+                            <option value="employee">Employee</option>
+                            <option value="hr">Human Resources</option>
+                            <option value="admin">Administrator</option>
+                          </select>
+                        </div>
+                        <div className="employee-edit-field">
+                          <label htmlFor="edit-status">Employment status</label>
+                          <select id="edit-status" name="status" value={form.status} onChange={set}>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                            <option value="On Leave">On leave</option>
+                          </select>
+                        </div>
+                        <div className="employee-edit-field">
+                          <label htmlFor="edit-gender">Gender</label>
+                          <select id="edit-gender" name="gender" value={form.gender} onChange={set}>
+                            <option value="">Select gender</option>
+                            <option value="Female">Female</option>
+                            <option value="Male">Male</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        </div>
+                        <EditField label="Date of birth" name="dateOfBirth" type="date" value={form.dateOfBirth} onChange={set} />
+                        <EditField label="Profile photo URL" name="photo" type="url" value={form.photo} onChange={set} />
+                        <div className="employee-edit-field employee-edit-field-wide">
+                          <label htmlFor="edit-address">Address</label>
+                          <textarea id="edit-address" name="address" value={form.address} onChange={set} rows={3} maxLength={300} />
+                        </div>
+                      </div>
+                      {!employeeProfile.employeeProfileId && (
+                        <p className="employee-edit-message">
+                          This login does not have a separate employee profile. Saving updates its account and profile fields.
+                        </p>
+                      )}
+                    </>
                   ) : (
-                    <p style={{ margin: 0, color: '#fca5a5', fontSize: '0.875rem' }}>
-                      Employee details could not be loaded.
-                    </p>
+                    <p className="employee-edit-error">Employee details could not be loaded.</p>
                   )}
                 </div>
-              </div>
+              </section>
             )}
 
             {/* ── Row 1: Full Name + Employee ID ── */}
@@ -309,8 +419,8 @@ export default function Register() {
                   value={form.role}
                   onChange={set}
                   style={buildInputStyle()}
-                  onFocus={e => { e.target.style.borderColor = '#3b82f6'; e.target.style.boxShadow = '0 0 0 3px rgba(59,130,246,0.15)'; }}
-                  onBlur={e  => { e.target.style.borderColor = '#334155'; e.target.style.boxShadow = 'none'; }}
+                  onFocus={e => { e.target.style.borderColor = '#3b79f6'; e.target.style.boxShadow = '0 0 0 3px rgba(59, 121, 246,0.15)'; }}
+                  onBlur={e  => { e.target.style.borderColor = '#333e55'; e.target.style.boxShadow = 'none'; }}
                 >
                   <option value="employee">Employee</option>
                   <option value="hr">Human Resources</option>
@@ -374,7 +484,8 @@ export default function Register() {
               </div>
             </TwoCol>
 
-            {/* ── Row 4: Password + Confirm Password ── */}
+            {/* ── Admin and HR accounts set their own initial passwords. ── */}
+            {form.role !== 'employee' && <>
             <TwoCol mt>
               {/* Password */}
               <div>
@@ -407,7 +518,7 @@ export default function Register() {
                 />
                 {pwMismatch && (
                   <p style={{ margin: '5px 0 0', fontSize: '0.75rem', color: '#f87171', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#f87171', flexShrink: 0 }} />
+                    <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#719ef8', flexShrink: 0 }} />
                     Passwords do not match
                   </p>
                 )}
@@ -420,24 +531,44 @@ export default function Register() {
               </div>
             </TwoCol>
             </>}
+            {form.role === 'employee' && (
+              <p style={{ margin: '20px 0 0', color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
+                A secure default password is assigned by the server. The employee must change it before accessing their dashboard.
+              </p>
+            )}
+            </>}
 
             {/* ── Face Recognition ── */}
             <div style={SECTION_DIVIDER}>
-              <p style={{ ...LABEL_STYLE, marginBottom: '12px' }}>Face Recognition</p>
+              <p style={{ ...LABEL_STYLE, marginBottom: '12px' }}>
+                {editUserId ? 'Face Recognition (separate from profile changes)' : 'Face Recognition'}
+              </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <div style={{ flex: 1 }}>
                   {face
                     ? <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.875rem', color: '#4ade80', fontWeight: 500 }}>
                         <CheckCircle2 size={16} color="#4ade80" />
-                        Face descriptor captured (128 points)
+                        Face descriptor captured (128 values); select Update Face to save it
                       </span>
                     : <span style={{ fontSize: '0.875rem', color: '#64748b' }}>
-                        No face captured — required for attendance
+                        {editUserId
+                          ? employeeProfile?.faceRegistered ? 'Face recognition is registered.' : 'No face is registered yet.'
+                          : 'No face captured — required for attendance'}
                       </span>
                   }
                 </div>
                 <CameraBtn onClick={openCam} disabled={!modelsOk} hasFace={!!face} />
               </div>
+              {editUserId && (
+                <button
+                  type="button"
+                  onClick={handleFaceUpdate}
+                  disabled={!face || loading || editLoading}
+                  className="employee-edit-primary employee-edit-face-action"
+                >
+                  {loading ? 'Updating face…' : 'Update Face'}
+                </button>
+              )}
             </div>
 
             {/* ── Feedback ── */}
@@ -451,12 +582,12 @@ export default function Register() {
                 onClick={() => navigate('/admin/users')}
                 style={{
                   padding: '10px 20px', borderRadius: '10px',
-                  background: '#1e293b', border: '1px solid #334155',
-                  cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, color: '#94a3b8',
+                  background: '#1c273d', border: '1px solid #333e55',
+                  cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, color: '#94a0b8',
                   transition: 'background 0.15s',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#334155'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = '#1e293b'; }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#333e55'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = '#1e283b'; }}
               >
                 Cancel
               </button>
@@ -466,18 +597,18 @@ export default function Register() {
                 style={{
                   display: 'flex', alignItems: 'center', gap: '8px',
                   padding: '10px 24px', borderRadius: '10px',
-                  background: loading || editLoading || pwMismatch ? '#1e3a8a' : '#2563eb',
+                  background: loading || editLoading || pwMismatch ? '#1e428a' : '#2567eb',
                   border: 'none', cursor: loading || editLoading || pwMismatch ? 'not-allowed' : 'pointer',
                   fontSize: '0.875rem', fontWeight: 600, color: '#fff',
                   opacity: loading || editLoading || pwMismatch ? 0.6 : 1,
                   transition: 'background 0.15s, opacity 0.15s',
-                  boxShadow: '0 4px 12px rgba(37,99,235,0.3)',
+                  boxShadow: '0 4px 12px rgba(37, 103, 235,0.3)',
                 }}
-                onMouseEnter={e => { if (!loading && !editLoading && !pwMismatch) e.currentTarget.style.background = '#3b82f6'; }}
-                onMouseLeave={e => { if (!loading && !editLoading && !pwMismatch) e.currentTarget.style.background = '#2563eb'; }}
+                onMouseEnter={e => { if (!loading && !editLoading && !pwMismatch) e.currentTarget.style.background = '#3b79f6'; }}
+                onMouseLeave={e => { if (!loading && !editLoading && !pwMismatch) e.currentTarget.style.background = '#2567eb'; }}
               >
                 <UserPlus size={15} />
-                {editLoading ? 'Loading…' : loading ? (editUserId ? 'Updating…' : 'Registering…') : (editUserId ? 'Update Face' : 'Register Employee')}
+                {editLoading ? 'Loading…' : loading ? (editUserId ? 'Saving…' : 'Registering…') : (editUserId ? 'Save All Changes' : 'Register Employee')}
               </button>
             </div>
           </div>
@@ -487,18 +618,18 @@ export default function Register() {
       {/* ── Camera modal ── */}
       {camOpen && (
         <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)',
+          position: 'fixed', inset: 0, background: 'rgba(0, 0, 0,0.75)',
           backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center',
           justifyContent: 'center', zIndex: 50, padding: '16px',
         }}>
           <div style={{
-            background: '#0f172a', border: '1px solid #334155',
+            background: '#0f182a', border: '1px solid #333e55',
             borderRadius: '20px', padding: '24px',
             width: '100%', maxWidth: '440px',
             boxShadow: '0 25px 60px rgba(0,0,0,0.5)',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#f1f5f9', margin: 0 }}>Capture Face</h3>
+              <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#f1f4f9', margin: 0 }}>Capture Face</h3>
               <button
                 onClick={closeCam}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px', borderRadius: '6px' }}
@@ -506,23 +637,23 @@ export default function Register() {
                 <X size={16} />
               </button>
             </div>
-            <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', background: '#000', aspectRatio: '4/3', marginBottom: '12px' }}>
+            <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', background: '#000000', aspectRatio: '4/3', marginBottom: '12px' }}>
               <video ref={videoRef} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} muted playsInline />
             </div>
-            <p style={{ textAlign: 'center', fontSize: '0.75rem', color: '#94a3b8', margin: '0 0 16px', minHeight: '1rem' }}>
+            <p style={{ textAlign: 'center', fontSize: '0.75rem', color: '#94a0b8', margin: '0 0 16px', minHeight: '1rem' }}>
               {camMsg}
             </p>
             <div style={{ display: 'flex', gap: '12px' }}>
               <button
                 onClick={closeCam}
-                style={{ flex: 1, padding: '10px', borderRadius: '10px', background: '#1e293b', border: '1px solid #334155', color: '#94a3b8', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer' }}
+                style={{ flex: 1, padding: '10px', borderRadius: '10px', background: '#1c273d', border: '1px solid #333e55', color: '#94a0b8', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer' }}
               >
                 Close
               </button>
               <button
                 onClick={captureFrame}
                 disabled={capturing || !videoRef.current?.srcObject}
-                style={{ flex: 1, padding: '10px', borderRadius: '10px', background: '#2563eb', border: 'none', color: '#fff', fontWeight: 600, fontSize: '0.875rem', cursor: capturing || !videoRef.current?.srcObject ? 'not-allowed' : 'pointer', opacity: capturing || !videoRef.current?.srcObject ? 0.6 : 1 }}
+                style={{ flex: 1, padding: '10px', borderRadius: '10px', background: '#2567eb', border: 'none', color: '#fff', fontWeight: 600, fontSize: '0.875rem', cursor: capturing || !videoRef.current?.srcObject ? 'not-allowed' : 'pointer', opacity: capturing || !videoRef.current?.srcObject ? 0.6 : 1 }}
               >
                 {capturing ? 'Scanning…' : 'Capture'}
               </button>
@@ -536,26 +667,6 @@ export default function Register() {
 
 /* ── Shared sub-components ─────────────────────────────────────────────── */
 
-function ProfileDetail({ label, value }) {
-  return (
-    <div style={{ minWidth: 0 }}>
-      <p style={{
-        margin: '0 0 5px',
-        color: '#64748b',
-        fontSize: '0.6875rem',
-        fontWeight: 700,
-        letterSpacing: '0.06em',
-        textTransform: 'uppercase',
-      }}>
-        {label}
-      </p>
-      <p style={{ margin: 0, color: '#e2e8f0', fontSize: '0.875rem', overflowWrap: 'anywhere' }}>
-        {value || '—'}
-      </p>
-    </div>
-  );
-}
-
 function TwoCol({ children, mt }) {
   return (
     <div style={{
@@ -565,6 +676,33 @@ function TwoCol({ children, mt }) {
       ...(mt ? { marginTop: '24px' } : {}),
     }}>
       {children}
+    </div>
+  );
+}
+
+function EditField({ label, name, value, onChange, type = 'text', required = false }) {
+  const maxLength = {
+    fullName: 201,
+    employeeId: 64,
+    email: 254,
+    phone: 32,
+    department: 100,
+    position: 100,
+    photo: 500,
+  }[name];
+  return (
+    <div className="employee-edit-field">
+      <label htmlFor={`edit-${name}`}>{label}{required ? ' *' : ''}</label>
+      <input
+        id={`edit-${name}`}
+        name={name}
+        type={type}
+        value={value}
+        onChange={onChange}
+        required={required}
+        maxLength={maxLength}
+        autoComplete="off"
+      />
     </div>
   );
 }
@@ -585,8 +723,8 @@ function FormField({ label, name, value, onChange, type = 'text', required }) {
         required={required}
         /* no placeholder — label above provides context */
         style={buildInputStyle({
-          borderColor: focused ? '#3b82f6' : '#334155',
-          boxShadow:   focused ? '0 0 0 3px rgba(59,130,246,0.15)' : 'none',
+          borderColor: focused ? '#3b79f6' : '#333e55',
+          boxShadow:   focused ? '0 0 0 3px rgba(59, 121, 246,0.15)' : 'none',
         })}
         onFocus={() => setFocused(true)}
         onBlur={()  => setFocused(false)}
@@ -597,11 +735,11 @@ function FormField({ label, name, value, onChange, type = 'text', required }) {
 
 function PasswordInput({ id, name, value, onChange, show, onToggle, borderColor }) {
   const [focused, setFocused] = useState(false);
-  const activeBorder = borderColor ?? (focused ? '#3b82f6' : '#334155');
+  const activeBorder = borderColor ?? (focused ? '#3b79f6' : '#333e55');
   const activeShadow = focused
     ? borderColor
       ? `0 0 0 3px ${borderColor}33`
-      : '0 0 0 3px rgba(59,130,246,0.15)'
+      : '0 0 0 3px rgba(59, 121, 246,0.15)'
     : 'none';
 
   return (
@@ -629,7 +767,7 @@ function PasswordInput({ id, name, value, onChange, show, onToggle, borderColor 
           color: '#64748b', display: 'flex', alignItems: 'center', padding: '2px',
           transition: 'color 0.12s',
         }}
-        onMouseEnter={e => { e.currentTarget.style.color = '#94a3b8'; }}
+        onMouseEnter={e => { e.currentTarget.style.color = '#94a0b8'; }}
         onMouseLeave={e => { e.currentTarget.style.color = '#64748b'; }}
       >
         {show ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -650,9 +788,9 @@ function CameraBtn({ onClick, disabled, hasFace }) {
       style={{
         display: 'flex', alignItems: 'center', gap: '8px',
         padding: '9px 18px', borderRadius: '10px',
-        background: hovered && !disabled ? '#334155' : '#1e293b',
-        border: '1px solid #334155', cursor: disabled ? 'not-allowed' : 'pointer',
-        fontSize: '0.875rem', fontWeight: 600, color: '#e2e8f0',
+        background: hovered && !disabled ? '#2a3b5e' : '#1c273d',
+        border: '1px solid #333e55', cursor: disabled ? 'not-allowed' : 'pointer',
+        fontSize: '0.875rem', fontWeight: 600, color: '#e2e7f0',
         opacity: disabled ? 0.5 : 1, transition: 'background 0.15s',
         flexShrink: 0,
       }}
@@ -672,9 +810,9 @@ function BackBtn({ onClick }) {
       onMouseLeave={() => setHovered(false)}
       style={{
         padding: '8px', borderRadius: '8px',
-        background: hovered ? '#334155' : '#1e293b',
-        border: '1px solid #334155', cursor: 'pointer',
-        color: hovered ? '#f1f5f9' : '#64748b',
+        background: hovered ? '#2a3b5e' : '#1c273d',
+        border: '1px solid #333e55', cursor: 'pointer',
+        color: hovered ? '#f1f4f9' : '#64748b',
         display: 'flex', alignItems: 'center',
         transition: 'background 0.12s, color 0.12s',
       }}
@@ -692,7 +830,7 @@ function AlertBanner({ type, text }) {
       padding: '12px 16px',
       borderRadius: '10px',
       borderLeft: `3px solid ${isErr ? '#ef4444' : '#22c55e'}`,
-      background: isErr ? 'rgba(127,29,29,0.25)' : 'rgba(21,128,61,0.2)',
+      background: isErr ? 'rgba(29, 62, 127,0.25)' : 'rgba(21, 57, 128,0.2)',
       border: `1px solid ${isErr ? 'rgba(239,68,68,0.3)' : 'rgba(34,197,94,0.3)'}`,
       color: isErr ? '#fca5a5' : '#86efac',
       fontSize: '0.875rem',
@@ -717,24 +855,24 @@ function DeptSelect({ name, value, onChange, required }) {
       onChange={onChange}
       required={required}
       style={buildInputStyle({
-        borderColor: focused ? '#3b82f6' : '#334155',
-        boxShadow:   focused ? '0 0 0 3px rgba(59,130,246,0.15)' : 'none',
+        borderColor: focused ? '#3b79f6' : '#333e55',
+        boxShadow:   focused ? '0 0 0 3px rgba(59, 121, 246,0.15)' : 'none',
         /* show a dim "unselected" cue without using placeholder text */
-        color: value === '' ? '#64748b' : '#f1f5f9',
+        color: value === '' ? '#64748b' : '#f1f4f9',
       })}
       onFocus={() => setFocused(true)}
       onBlur={()  => setFocused(false)}
     >
       {/* First option acts as the empty state label — not a placeholder */}
-      <option value="" disabled style={{ color: '#64748b', background: '#1e293b' }}>
+      <option value="" disabled style={{ color: '#64748b', background: '#1c273d' }}>
         Select department
       </option>
       {DEPARTMENTS.map(d => (
-        <option key={d} value={d} style={{ background: '#1e293b', color: '#f1f5f9' }}>
+        <option key={d} value={d} style={{ background: '#1c273d', color: '#f1f4f9' }}>
           {d}
         </option>
       ))}
-      <option value={CUSTOM_OPTION} style={{ background: '#1e293b', color: '#f1f5f9' }}>
+      <option value={CUSTOM_OPTION} style={{ background: '#1c273d', color: '#f1f4f9' }}>
         Other (enter custom department)
       </option>
     </select>

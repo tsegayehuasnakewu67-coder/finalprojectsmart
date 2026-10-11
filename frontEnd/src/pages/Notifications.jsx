@@ -6,10 +6,10 @@ import { userService } from '../services/userService';
 import Spinner from '../components/Spinner';
 import { formatEthiopianDateTime } from '../utils/ethiopianDateTime';
 
-const pageStyle = { color: '#e2e8f0', display: 'flex', flexDirection: 'column', gap: '24px' };
-const cardStyle = { background: '#0f172a', border: '1px solid #1e293b', borderRadius: '16px', padding: '24px' };
-const inputStyle = { width: '100%', boxSizing: 'border-box', padding: '11px 12px', borderRadius: '10px', border: '1px solid #334155', background: '#1e293b', color: '#e2e8f0', outline: 'none', fontSize: '0.875rem' };
-const labelStyle = { display: 'block', marginBottom: '7px', color: '#94a3b8', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' };
+const pageStyle = { color: '#e2e7f0', display: 'flex', flexDirection: 'column', gap: '24px' };
+const cardStyle = { background: '#0f182a', border: '1px solid #1e283b', borderRadius: '16px', padding: '24px' };
+const inputStyle = { width: '100%', boxSizing: 'border-box', padding: '11px 12px', borderRadius: '10px', border: '1px solid #333e55', background: '#1c273d', color: '#e2e7f0', outline: 'none', fontSize: '0.875rem' };
+const labelStyle = { display: 'block', marginBottom: '7px', color: '#94a0b8', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' };
 
 export default function Notifications() {
   const { user } = useAuth();
@@ -46,7 +46,7 @@ function AdminNotifications() {
   return (
     <div style={pageStyle}>
       <header>
-        <h1 style={{ margin: 0, color: '#f8fafc', fontSize: '1.5rem', fontWeight: 800 }}>Messages & Warnings</h1>
+        <h1 style={{ margin: 0, color: '#f8f9fc', fontSize: '1.5rem', fontWeight: 800 }}>Messages & Warnings</h1>
         <p style={{ margin: '6px 0 0', color: '#64748b', fontSize: '0.875rem' }}>Send an attendance warning or message to one employee or all active employees.</p>
       </header>
 
@@ -55,7 +55,7 @@ function AdminNotifications() {
           <form onSubmit={send} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               <button type="button" onClick={() => setForm(previous => ({ ...previous, type: 'warning', subject: 'Attendance warning' }))} style={choiceStyle(form.type === 'warning', '#f59e0b')}><AlertTriangle size={16} /> Late attendance warning</button>
-              <button type="button" onClick={() => setForm(previous => ({ ...previous, type: 'message', subject: '' }))} style={choiceStyle(form.type === 'message', '#3b82f6')}><MessageSquare size={16} /> General message</button>
+              <button type="button" onClick={() => setForm(previous => ({ ...previous, type: 'message', subject: '' }))} style={choiceStyle(form.type === 'message', '#3b79f6')}><MessageSquare size={16} /> General message</button>
             </div>
 
             <div>
@@ -79,7 +79,7 @@ function AdminNotifications() {
             {status.error && <Notice tone="error">{status.error}</Notice>}
             {status.success && <Notice tone="success">{status.success}</Notice>}
 
-            <button type="submit" disabled={sending} style={{ alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: '8px', border: 0, borderRadius: '10px', padding: '11px 18px', background: '#2563eb', color: '#fff', cursor: sending ? 'not-allowed' : 'pointer', fontWeight: 700, opacity: sending ? 0.6 : 1 }}>
+            <button type="submit" disabled={sending} style={{ alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: '8px', border: 0, borderRadius: '10px', padding: '11px 18px', background: '#2567eb', color: '#fff', cursor: sending ? 'not-allowed' : 'pointer', fontWeight: 700, opacity: sending ? 0.6 : 1 }}>
               <Send size={15} /> {sending ? 'Sending...' : 'Send notification'}
             </button>
           </form>
@@ -108,19 +108,19 @@ function EmployeeNotifications() {
   return (
     <div style={pageStyle}>
       <header>
-        <h1 style={{ margin: 0, color: '#f8fafc', fontSize: '1.5rem', fontWeight: 800 }}>My Notifications</h1>
+        <h1 style={{ margin: 0, color: '#f8f9fc', fontSize: '1.5rem', fontWeight: 800 }}>My Notifications</h1>
         <p style={{ margin: '6px 0 0', color: '#64748b', fontSize: '0.875rem' }}>Attendance warnings and messages from the administrator.</p>
       </header>
       {error && <Notice tone="error">{error}</Notice>}
       {loading ? <Spinner /> : notifications.length === 0 ? <div style={cardStyle}><p style={{ margin: 0, color: '#64748b' }}>No messages yet.</p></div> : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {notifications.map(notification => (
-            <button key={notification._id} onClick={() => markRead(notification)} style={{ ...cardStyle, width: '100%', textAlign: 'left', cursor: notification.readAt ? 'default' : 'pointer', borderColor: notification.readAt ? '#1e293b' : notification.type === 'warning' ? 'rgba(245,158,11,0.55)' : 'rgba(59,130,246,0.55)', opacity: notification.readAt ? 0.78 : 1 }}>
+            <button key={notification._id} onClick={() => markRead(notification)} style={{ ...cardStyle, width: '100%', textAlign: 'left', cursor: notification.readAt ? 'default' : 'pointer', borderColor: notification.readAt ? '#1e283b' : notification.type === 'warning' ? 'rgba(245,158,11,0.55)' : 'rgba(59, 121, 246,0.55)', opacity: notification.readAt ? 0.78 : 1 }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
-                <div style={{ color: notification.type === 'warning' ? '#fbbf24' : '#60a5fa' }}>{notification.type === 'warning' ? <AlertTriangle size={20} /> : <Bell size={20} />}</div>
+                <div style={{ color: notification.type === 'warning' ? '#fbbf24' : '#6093fa' }}>{notification.type === 'warning' ? <AlertTriangle size={20} /> : <Bell size={20} />}</div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}><h2 style={{ margin: 0, color: '#f1f5f9', fontSize: '0.95rem' }}>{notification.subject}</h2>{!notification.readAt && <span style={{ color: '#60a5fa', fontSize: '0.7rem', fontWeight: 700 }}>NEW</span>}</div>
-                  <p style={{ margin: '8px 0', color: '#cbd5e1', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{notification.message}</p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}><h2 style={{ margin: 0, color: '#f1f4f9', fontSize: '0.95rem' }}>{notification.subject}</h2>{!notification.readAt && <span style={{ color: '#6093fa', fontSize: '0.7rem', fontWeight: 700 }}>NEW</span>}</div>
+                  <p style={{ margin: '8px 0', color: '#cbd2e1', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{notification.message}</p>
                   <small style={{ color: '#64748b' }}>{formatEthiopianDateTime(notification.createdAt)}</small>
                 </div>
               </div>
@@ -133,10 +133,10 @@ function EmployeeNotifications() {
 }
 
 function choiceStyle(active, color) {
-  return { display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '9px 12px', borderRadius: '9px', border: `1px solid ${active ? color : '#334155'}`, background: active ? `${color}22` : '#1e293b', color: active ? color : '#94a3b8', cursor: 'pointer', fontWeight: 700, fontSize: '0.78rem' };
+  return { display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '9px 12px', borderRadius: '9px', border: `1px solid ${active ? color : '#333e55'}`, background: active ? `${color}22` : '#1c273d', color: active ? color : '#94a0b8', cursor: 'pointer', fontWeight: 700, fontSize: '0.78rem' };
 }
 
 function Notice({ tone, children }) {
   const color = tone === 'error' ? '#fca5a5' : '#86efac';
-  return <div style={{ padding: '11px 13px', borderRadius: '9px', color, background: tone === 'error' ? 'rgba(127,29,29,0.3)' : 'rgba(21,128,61,0.2)', border: `1px solid ${tone === 'error' ? '#991b1b' : '#166534'}`, fontSize: '0.875rem' }}>{children}</div>;
+  return <div style={{ padding: '11px 13px', borderRadius: '9px', color, background: tone === 'error' ? 'rgba(29, 62, 127,0.3)' : 'rgba(21, 57, 128,0.2)', border: `1px solid ${tone === 'error' ? '#991b1b' : '#166534'}`, fontSize: '0.875rem' }}>{children}</div>;
 }

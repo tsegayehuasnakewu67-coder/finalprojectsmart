@@ -1,7 +1,17 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff, Loader2, ArrowRight, Camera } from 'lucide-react';
+
+const LOGIN_BACKGROUND_IMAGES = [
+  'mau7.jfif',
+  'mau1.jfif',
+  'mau2.jfif',
+  'mau3.jfif',
+  'mau4.jfif',
+  'mau5.jfif',
+  'mau6.jfif',
+];
 
 /* ─── Inline stylesheet ──────────────────────────────────────────────────── */
 const STYLES = `
@@ -21,15 +31,45 @@ const STYLES = `
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     overflow: hidden;
     background:
-      radial-gradient(circle at 12% 8%, rgba(37, 99, 235, 0.2), transparent 28%),
-      radial-gradient(circle at 88% 88%, rgba(250, 204, 21, 0.13), transparent 25%),
-      linear-gradient(135deg, #f8fafc 0%, #eef4ff 52%, #f8fafc 100%);
+      radial-gradient(circle at top, rgba(19, 163, 123, 0.22), transparent 28%),
+      linear-gradient(135deg, #061b17 0%, #0a2d27 28%, #0d3a32 52%, #0c271f 100%);
+  }
+
+  .login-background {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background: transparent;
+  }
+
+  .login-background::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(135deg, rgba(5, 24, 19, 0.34), rgba(7, 34, 28, 0.24) 52%, rgba(5, 20, 15, 0.4)),
+      radial-gradient(circle at 50% 45%, rgba(16, 185, 129, 0.1), rgba(3, 9, 8, 0.18));
+  }
+
+  .login-background-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    opacity: 0;
+    transform: scale(1.06);
+    filter: brightness(1.18) saturate(1.08);
+    animation: loginBackgroundCycle 42s ease-in-out infinite;
   }
 
   .login-accents {
     position: absolute;
     inset: 0;
-    z-index: 0;
+    z-index: 1;
     pointer-events: none;
     overflow: hidden;
   }
@@ -47,7 +87,7 @@ const STYLES = `
     left: -50px;
     width: 300px;
     height: 300px;
-    background: radial-gradient(circle, #60A5FA 0%, #818CF8 45%, transparent 70%);
+    background: radial-gradient(circle, rgba(52, 211, 153, 0.9) 0%, rgba(16, 185, 129, 0.72) 42%, transparent 70%);
   }
 
   .login-accent--br {
@@ -55,7 +95,7 @@ const STYLES = `
     bottom: -50px;
     width: 320px;
     height: 320px;
-    background: radial-gradient(circle, #818CF8 0%, #38BDF8 50%, transparent 72%);
+    background: radial-gradient(circle, rgba(110, 231, 183, 0.9) 0%, rgba(5, 150, 105, 0.8) 50%, transparent 72%);
     animation-delay: -4s;
   }
 
@@ -67,11 +107,11 @@ const STYLES = `
     height: 540px;
     transform: translate(-50%, -50%);
     border-radius: 50%;
-    border: 1.5px solid rgba(99, 102, 241, 0.14);
+    border: 1.5px solid rgba(110, 231, 183, 0.24);
     box-shadow:
-      0 0 0 36px rgba(59, 130, 246, 0.045),
-      0 0 0 72px rgba(99, 102, 241, 0.03),
-      inset 0 0 48px rgba(59, 130, 246, 0.04);
+      0 0 0 36px rgba(16, 185, 129, 0.05),
+      0 0 0 72px rgba(110, 231, 183, 0.03),
+      inset 0 0 48px rgba(16, 185, 129, 0.04);
     animation: ringsPulse 8s ease-in-out infinite;
   }
 
@@ -85,9 +125,9 @@ const STYLES = `
     opacity: 0.45;
   }
 
-  .login-root > *:not(.login-accents) {
+  .login-root > *:not(.login-accents):not(.login-background) {
     position: relative;
-    z-index: 1;
+    z-index: 2;
   }
 
   /* ── Brand ── */
@@ -104,25 +144,25 @@ const STYLES = `
     width: 56px;
     height: 56px;
     border-radius: 16px;
-    background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 72%, #2563eb 100%);
+    background: linear-gradient(135deg, #0b2d27 0%, #0f766e 62%, #34d399 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 18px;
-    box-shadow: 0 8px 28px rgba(37, 99, 235, 0.28);
-    border: 2px solid rgba(250, 204, 21, 0.8);
+    box-shadow: 0 8px 28px rgba(16, 185, 129, 0.28);
+    border: 2px solid rgba(52, 211, 153, 0.7);
     animation: logoPulse 3.5s ease-in-out infinite;
     position: relative;
     overflow: hidden;
     padding: 4px;
-    background: #ffffff;
+    background: #123a2d;
   }
 
   .login-logo::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.28), transparent 68%);
+    background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.28), transparent 68%);
     transform: translateX(-120%);
     animation: logoShine 4s ease-in-out infinite;
   }
@@ -145,7 +185,7 @@ const STYLES = `
   }
 
   .mau-logo-mark strong {
-    color: #facc15;
+    color: #34d399;
     font-size: 1.05rem;
     font-weight: 900;
     letter-spacing: 0.12em;
@@ -163,7 +203,7 @@ const STYLES = `
   .login-app-name {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #0F172A;
+    color: #E2E8F0;
     letter-spacing: -0.5px;
     margin: 0 0 4px;
     line-height: 1.2;
@@ -171,7 +211,7 @@ const STYLES = `
 
   .login-app-sub {
     font-size: 13px;
-    color: #64748B;
+    color: #94A3B8;
     margin: 0;
     font-weight: 500;
     letter-spacing: 0.01em;
@@ -180,16 +220,16 @@ const STYLES = `
     font-size: 11px;
   }
 
-  /* ── Clean white sign-in card ── */
+  /* ── Dark sign-in card ── */
   .login-card {
     width: 100%;
     max-width: 480px;
     padding: 3rem;
-    background: rgba(255, 255, 255, 0.84);
-    border: 1px solid rgba(255, 255, 255, 0.9);
-    border-top: 3px solid #facc15;
+    background: rgba(13, 31, 27, 0.96);
+    border: 1px solid rgba(52, 211, 153, 0.48);
+    border-top: 3px solid #34d399;
     border-radius: 24px;
-    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.14), 0 0 0 8px rgba(255, 255, 255, 0.28);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.48), 0 0 0 8px rgba(16, 185, 129, 0.08);
     backdrop-filter: blur(18px);
     animation: revealUp 0.8s 0.12s ease both;
   }
@@ -199,7 +239,7 @@ const STYLES = `
   .login-card-heading h2 {
     font-size: 1.875rem;
     font-weight: 700;
-    color: #0F172A;
+    color: #F1F5F9;
     margin: 0 0 8px;
     letter-spacing: -0.4px;
     line-height: 1.2;
@@ -208,13 +248,13 @@ const STYLES = `
 
   .login-card-heading p {
     font-size: 14px;
-    color: #64748B;
+    color: #94A3B8;
     margin: 0;
   }
 
   .login-divider {
     height: 1px;
-    background: linear-gradient(90deg, transparent, #dbeafe, #facc15, transparent);
+    background: linear-gradient(90deg, transparent, #214d3d, #34d399, transparent);
     margin-bottom: 28px;
   }
 
@@ -225,7 +265,7 @@ const STYLES = `
     display: block;
     font-size: 0.875rem;
     font-weight: 600;
-    color: #1E293B;
+    color: #CBD5E1;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     margin-bottom: 8px;
@@ -245,28 +285,28 @@ const STYLES = `
     padding: 0.875rem 1rem;
     font-size: 15px;
     font-family: inherit;
-    color: #0F172A;
-    background: rgba(248, 250, 252, 0.86);
-    border: 1.5px solid #D7E0EE;
+    color: #E2E8F0;
+    background: rgba(10, 28, 24, 0.9);
+    border: 1.5px solid rgba(94, 234, 212, 0.45);
     border-radius: 12px;
     outline: none;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    box-shadow: 0 1px 2px rgba(15, 24, 42, 0.04);
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, transform 0.2s ease;
     -webkit-appearance: none;
   }
 
-  .login-input::placeholder { color: #94A3B8; }
+  .login-input::placeholder { color: #8bcab4; }
 
   .login-input:hover:not(:disabled) {
-    border-color: #CBD5E1;
-    background: #FFFFFF;
+    border-color: rgba(110, 231, 183, 0.8);
+    background: rgba(12, 33, 29, 0.96);
   }
 
   .login-input:focus {
-    border-color: #2563EB;
-    background: #FFFFFF;
+    border-color: #34d399;
+    background: rgba(12, 33, 29, 0.96);
     transform: translateY(-1px);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14), 0 8px 20px rgba(37, 99, 235, 0.08);
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.14), 0 8px 20px rgba(52, 211, 153, 0.08);
   }
 
   .login-input--pw { padding-right: 42px; }
@@ -288,10 +328,10 @@ const STYLES = `
     transition: color 0.15s;
   }
 
-  .login-pw-toggle:hover { color: #475569; }
+  .login-pw-toggle:hover { color: #E2E8F0; }
 
   .login-pw-toggle:focus-visible {
-    outline: 2px solid #3B82F6;
+    outline: 2px solid #10b981;
     outline-offset: 1px;
   }
 
@@ -302,12 +342,12 @@ const STYLES = `
     gap: 10px;
     padding: 12px 14px;
     margin-bottom: 20px;
-    background: #FEF2F2;
-    border: 1px solid #FECACA;
+    background: #321B2A;
+    border: 1px solid #7F303B;
     border-left: 3px solid #F87171;
     border-radius: 10px;
     font-size: 13px;
-    color: #B91C1C;
+    color: #FCA5A5;
     line-height: 1.5;
     font-weight: 500;
   }
@@ -317,7 +357,7 @@ const STYLES = `
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #FC8181;
+    background: #F87171;
     margin-top: 5px;
   }
 
@@ -331,14 +371,14 @@ const STYLES = `
     gap: 10px;
     padding: 0 1rem;
     font-size: 1.125rem;
-    font-weight: 600;
+    font-weight: 700;
     font-family: inherit;
-    color: #FFFFFF;
-    background: linear-gradient(110deg, #0f172a 0%, #1d4ed8 55%, #4f46e5 100%);
+    color: #04150f;
+    background: linear-gradient(110deg, #5eead4 0%, #34d399 38%, #10b981 100%);
     border: none;
     border-radius: 10px;
     cursor: pointer;
-    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.38);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.38);
     transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
     letter-spacing: 0.01em;
     position: relative;
@@ -349,7 +389,7 @@ const STYLES = `
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(110deg, transparent 25%, rgba(255,255,255,0.24), transparent 65%);
+    background: linear-gradient(110deg, transparent 25%, rgba(255, 255, 255, 0.24), transparent 65%);
     transform: translateX(-120%);
     transition: transform 0.55s ease;
   }
@@ -358,24 +398,24 @@ const STYLES = `
 
   .login-btn:hover:not(:disabled) {
     transform: scale(1.02);
-    box-shadow: 0 12px 32px rgba(37, 99, 235, 0.52);
+    box-shadow: 0 12px 32px rgba(16, 185, 129, 0.52);
     filter: brightness(1.06);
   }
 
   .login-btn:active:not(:disabled) {
     transform: scale(0.99);
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.32);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.32);
   }
 
   .login-btn:disabled {
-    background: linear-gradient(to right, #93C5FD, #A5B4FC);
+    background: linear-gradient(to right, #334155, #475569);
     box-shadow: none;
     cursor: not-allowed;
     filter: none;
   }
 
   .login-btn:focus-visible {
-    outline: 2px solid #3B82F6;
+    outline: 2px solid #10b981;
     outline-offset: 3px;
   }
 
@@ -391,20 +431,20 @@ const STYLES = `
     align-items: center;
     gap: 16px;
     padding: 18px 24px;
-    background: linear-gradient(110deg, rgba(15, 23, 42, 0.97), rgba(30, 64, 175, 0.96));
-    border: 1.5px solid rgba(250, 204, 21, 0.5);
+    background: linear-gradient(110deg, rgba(13, 31, 27, 0.97), rgba(7, 103, 79, 0.94));
+    border: 1.5px solid rgba(52, 211, 153, 0.5);
     border-radius: 18px;
     text-decoration: none;
     cursor: pointer;
-    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.2);
+    box-shadow: 0 16px 34px rgba(15, 24, 42, 0.2);
     transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
   }
 
   .kiosk-cta:hover {
-    background: linear-gradient(110deg, #111827, #1d4ed8);
-    border-color: #facc15;
+    background: linear-gradient(110deg, rgba(13, 31, 27, 1), rgba(10, 127, 93, 0.96));
+    border-color: #34d399;
     transform: translateY(-3px);
-    box-shadow: 0 14px 32px rgba(59, 130, 246, 0.18);
+    box-shadow: 0 14px 32px rgba(16, 185, 129, 0.18);
   }
 
   .kiosk-cta:active {
@@ -415,12 +455,12 @@ const STYLES = `
     width: 46px;
     height: 46px;
     border-radius: 13px;
-    background: linear-gradient(135deg, #2563EB 0%, #3B82F6 100%);
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
     transition: transform 0.15s ease;
   }
 
@@ -433,19 +473,19 @@ const STYLES = `
   .kiosk-cta-title {
     font-size: 15px;
     font-weight: 700;
-    color: #f8fafc;
+    color: #f8f9fc;
     margin: 0 0 2px;
     letter-spacing: -0.2px;
   }
 
   .kiosk-cta-sub {
     font-size: 12px;
-    color: #cbd5e1;
+    color: #cbd2e1;
     margin: 0;
   }
 
   .kiosk-cta-arrow {
-    color: #facc15;
+    color: #a7f3d0;
     flex-shrink: 0;
     transition: transform 0.15s ease;
   }
@@ -475,8 +515,8 @@ const STYLES = `
   }
 
   @keyframes logoPulse {
-    0%, 100% { box-shadow: 0 8px 28px rgba(37, 99, 235, 0.28); }
-    50% { box-shadow: 0 12px 38px rgba(37, 99, 235, 0.45), 0 0 0 6px rgba(250, 204, 21, 0.08); }
+    0%, 100% { box-shadow: 0 8px 28px rgba(16, 185, 129, 0.28); }
+    50% { box-shadow: 0 12px 38px rgba(16, 185, 129, 0.45), 0 0 0 6px rgba(52, 211, 153, 0.12); }
   }
 
   @keyframes logoShine {
@@ -484,20 +524,25 @@ const STYLES = `
     75%, 100% { transform: translateX(120%); }
   }
 
+  @keyframes loginBackgroundCycle {
+    0%, 12% { opacity: 1; transform: scale(1.04); }
+    17%, 100% { opacity: 0; transform: scale(1.12); }
+  }
+
   /* ── Spinner ── */
   @keyframes spin { to { transform: rotate(360deg); } }
   .spin { animation: spin 0.75s linear infinite; }
 
-  /* ── Autofill override — keep light-mode card clean ── */
+  /* ── Autofill override — keep dark-mode contrast ── */
   .login-input:-webkit-autofill,
   .login-input:-webkit-autofill:hover,
   .login-input:-webkit-autofill:focus,
   .login-input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 1000px #FFFFFF inset !important;
-    box-shadow:         0 0 0 1000px #FFFFFF inset !important;
-    -webkit-text-fill-color: #0F172A !important;
-    caret-color: #0F172A;
-    border-color: #E2E8F0 !important;
+    -webkit-box-shadow: 0 0 0 1000px #0B1425 inset !important;
+    box-shadow:         0 0 0 1000px #0B1425 inset !important;
+    -webkit-text-fill-color: #E2E8F0 !important;
+    caret-color: #E2E8F0;
+    border-color: #334155 !important;
     transition: background-color 99999s ease-in-out 0s;
   }
 
@@ -514,14 +559,21 @@ const STYLES = `
       transition: none;
       animation: none;
     }
+    .login-background-image {
+      animation: none;
+      opacity: 0;
+      transform: none;
+    }
+    .login-background-image:first-child { opacity: 1; }
   }
 `;
 
 export default function Login() {
   const { login }   = useAuth();
   const navigate    = useNavigate();
+  const location    = useLocation();
 
-  const [form,    setForm]    = useState({ email: '', password: '' });
+  const [form,    setForm]    = useState({ identifier: '', password: '' });
   const [error,   setError]   = useState('');
   const [loading, setLoading] = useState(false);
   const [showPw,  setShowPw]  = useState(false);
@@ -531,14 +583,19 @@ export default function Login() {
     setError('');
     setLoading(true);
     try {
-      const user = await login(form.email.trim(), form.password);
-      navigate(({ admin: '/admin', hr: '/hr', employee: '/me' })[user.role] || '/', { replace: true });
+      const user = await login(form.identifier.trim(), form.password);
+      navigate(user.mustChangePassword
+        ? '/change-password'
+        : (({ admin: '/admin', hr: '/hr', employee: '/me' })[user.role] || '/'), { replace: true });
     } catch (err) {
-      setError(
-        err?.response?.data?.message ||
-        err.message ||
-        'Invalid credentials. Please try again.'
-      );
+      const status = err?.response?.status;
+      setError(err?.response?.data?.message || (
+        !err.response && ['ERR_NETWORK', 'ECONNABORTED'].includes(err.code)
+          ? 'Unable to reach the login server. Confirm the backend is running and try again.'
+          : status >= 500
+            ? 'The server could not complete sign-in. Please try again shortly.'
+            : err.message || 'Invalid credentials. Please try again.'
+      ));
     } finally {
       setLoading(false);
     }
@@ -549,22 +606,33 @@ export default function Login() {
       <style>{STYLES}</style>
 
       <div className="login-root">
+        <div className="login-background" aria-hidden="true">
+          {LOGIN_BACKGROUND_IMAGES.map((image, index) => (
+            <img
+              key={image}
+              className="login-background-image"
+              src={`/login-backgrounds/${image}`}
+              alt=""
+              style={{ animationDelay: `-${index * 6}s` }}
+            />
+          ))}
+        </div>
         <div className="login-accents" aria-hidden="true">
           <span className="login-accent login-accent--tl" />
           <span className="login-accent login-accent--br" />
           <span className="login-rings" />
           <svg className="login-waves" viewBox="0 0 1440 180" preserveAspectRatio="none">
-            <path fill="none" stroke="#93C5FD" strokeWidth="1.5" d="M0 110 C 240 40, 480 160, 720 100 S 1200 40, 1440 110" />
-            <path fill="none" stroke="#C7D2FE" strokeWidth="1.5" d="M0 140 C 280 80, 520 180, 800 130 S 1180 90, 1440 150" />
+            <path fill="none" stroke="#7ae7c4" strokeWidth="1.5" d="M0 110 C 240 40, 480 160, 720 100 S 1200 40, 1440 110" />
+            <path fill="none" stroke="#dcfce7" strokeWidth="1.5" d="M0 140 C 280 80, 520 180, 800 130 S 1180 90, 1440 150" />
           </svg>
         </div>
 
         {/* ── Brand ── */}
         <div className="login-brand">
           <div className="login-logo" aria-hidden="true">
-            <img className="login-logo-image" src="/mau-logo.svg" alt="" />
+            <img className="login-logo-image" src="/mau-logo.png" alt="" />
           </div>
-          <h1 className="login-app-name">Mekdela Abba University</h1>
+          <h1 className="login-app-name">Mekdela Amba University</h1>
           <p className="login-app-sub">Smart Attendance System</p>
         </div>
 
@@ -574,6 +642,11 @@ export default function Login() {
             <h2>Welcome back</h2>
             <p>Sign in to access your dashboard</p>
           </div>
+          {location.state?.message && (
+            <div role="status" className="login-error" style={{ color: '#a7f3d0', background: '#052e24', borderColor: '#047857', borderLeftColor: '#34d399' }}>
+              {location.state.message}
+            </div>
+          )}
 
           <div className="login-divider" aria-hidden="true" />
 
@@ -586,24 +659,30 @@ export default function Login() {
           */}
           <form onSubmit={handleSubmit} noValidate autoComplete="off">
 
-            {/* Email */}
+            {/* Employee ID or email */}
             <div className="login-field">
-              <label htmlFor="login-email" className="login-label">
-                Email Address<span className="req" aria-hidden="true">*</span>
+              <label htmlFor="login-identifier" className="login-label">
+                Employee ID or Email<span className="req" aria-hidden="true">*</span>
               </label>
               <div className="login-input-wrap">
                 <input
-                  id="login-email"
-                  name="login-email"
-                  type="email"
+                  id="login-identifier"
+                  name="login-identifier"
+                  type="text"
                   autoComplete="username"
                   required
-                  value={form.email}
-                  onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+                  value={form.identifier}
+                  onChange={e => setForm(p => ({ ...p, identifier: e.target.value }))}
                   className="login-input"
                   disabled={loading}
                 />
               </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '-14px', marginBottom: '20px' }}>
+              <Link to="/forgot-password" style={{ color: '#6ee7b7', fontSize: '0.8125rem', textDecoration: 'none' }}>
+                Forgot Password?
+              </Link>
             </div>
 
             {/* Password */}
@@ -616,7 +695,7 @@ export default function Login() {
                   id="login-password"
                   name="login-password"
                   type={showPw ? 'text' : 'password'}
-                  autoComplete="new-password"
+                  autoComplete="current-password"
                   required
                   value={form.password}
                   onChange={e => setForm(p => ({ ...p, password: e.target.value }))}

@@ -147,11 +147,11 @@ const deleteAttendance = async (req, res) => {
 
 const getEmployeeAttendance = async (req, res) => {
   const employeeId = String(req.params.employeeId).trim().toUpperCase();
+  if (req.user.role === 'employee' && req.user.employeeId !== employeeId) {
+    return res.status(403).json({ success: false, message: 'Access denied.' });
+  }
   try {
     const records = await Attendance.find({ employeeId }).sort({ date: -1, checkInTime: -1 });
-    if (req.user.role === 'employee' && req.user.employeeId !== employeeId) {
-      return res.status(403).json({ success: false, message: 'Access denied.' });
-    }
     return res.json({ success: true, data: { records } });
   } catch {
     return res.status(500).json({ success: false, message: 'Unable to retrieve employee attendance.' });

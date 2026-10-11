@@ -1,6 +1,6 @@
 ﻿require('dotenv').config();
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+const { getDefaultEmployeePassword } = require('./utils/passwordPolicy');
 
 const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI;
 
@@ -21,9 +21,7 @@ async function seedMissing() {
       { employeeId: 'MAU1601224', firstName: 'desalegn', lastName: 'getawun', email: 'desalegn@gmail.com',                department: 'Construction Technology and Management', position: 'Registrar', phone: '+251911000012', role: 'hr' }
     ];
 
-    const plainPassword = 'Employee@123';
-    const salt = await bcrypt.genSalt(12);
-    const hashedPassword = await bcrypt.hash(plainPassword, salt);
+    const defaultPassword = getDefaultEmployeePassword();
 
     let added = 0;
     let skipped = 0;
@@ -49,12 +47,14 @@ async function seedMissing() {
         fullName: fullName,
         name: fullName,
         email: emp.email,
-        password: hashedPassword,
+        password: defaultPassword,
         department: emp.department,
         position: emp.position,
         phone: emp.phone,
         role: emp.role || 'employee',
         isActive: true,
+        mustChangePassword: (emp.role || 'employee') === 'employee',
+        passwordChangedAt: null,
         faceDescriptor: []
       });
       console.log('Created:', fullName, '(' + emp.email + ')');

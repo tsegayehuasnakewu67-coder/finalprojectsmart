@@ -1,0 +1,4 @@
+employeeId,firstName,lastName,email,department,position,hireDate
+EMP101,Samuel,Tesla,samuel.t@smartattend.com,IT,Network Admin,2026-01-15
+EMP102,Maria,Curie,maria.c@smartattend.com,Research,Scientist,2026-02-01
+EMP103,Alan,Turing,alan.t@smartattend.com,Engineering,Developer,2026-03-10

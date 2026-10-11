@@ -1,6 +1,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const { getDefaultEmployeePassword } = require('./utils/passwordPolicy');
 
 const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI;
 
@@ -23,9 +24,9 @@ async function seedDirect() {
     all.forEach(u => console.log('  -', u.employeeId, u.email, u.fullName));
 
     // አዲስ ለመጨመር
-    const plainPassword = 'Employee@123';
+    const defaultPassword = getDefaultEmployeePassword();
     const salt = await bcrypt.genSalt(12);
-    const hashedPassword = await bcrypt.hash(plainPassword, salt);
+    const hashedPassword = await bcrypt.hash(defaultPassword, salt);
 
     const missingEmployees = [
       { employeeId: 'EMP006', firstName: 'Meron',    lastName: 'Getachew', email: 'meron.getachew@smartattendance.local',  department: 'Finance',           position: 'Finance Officer',         phone: '+251911000006', role: 'employee' },
@@ -64,6 +65,8 @@ async function seedDirect() {
         phone: emp.phone,
         role: emp.role || 'employee',
         isActive: true,
+        mustChangePassword: (emp.role || 'employee') === 'employee',
+        passwordChangedAt: null,
         faceDescriptor: [],
         createdAt: new Date(),
         updatedAt: new Date(),

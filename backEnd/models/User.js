@@ -27,6 +27,11 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String, enum: ['admin', 'hr', 'employee'], default: 'employee',
   },
+  mustChangePassword: { type: Boolean, default: false, index: true },
+  passwordChangedAt: { type: Date, default: null },
+  authVersion: { type: Number, default: 0, min: 0 },
+  passwordResetTokenHash: { type: String, default: null, select: false },
+  passwordResetExpiresAt: { type: Date, default: null, select: false },
   faceDescriptor: {
     type: [Number], default: [],
     validate: {
